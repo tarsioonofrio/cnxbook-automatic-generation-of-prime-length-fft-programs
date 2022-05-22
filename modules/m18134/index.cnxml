@@ -1,0 +1,880 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>A Bilinear Form for the DFT</title>
+  <metadata>
+  <md:content-id>m18134</md:content-id><md:title>A Bilinear Form for the DFT</md:title>
+  <md:abstract>This collection of modules is from a Rice University, ECE Department Technical Report written around September 1994. It grew out of the doctoral and post doctoral research of Ivan Selesnick working with Prof. C. Sidney Burrus at Rice. Earlier reports on this work were published in the ICASSP and ISCAS conference proceedings in 1992-94 and a fairly complete report was published in the IEEE Transaction on Signal Processing in January 1996.</md:abstract>
+  <md:uuid>37259924-7935-4be8-859d-7a81d2d3bd9d</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>A Bilinear Form for the DFT</title>
+      <para id="id2253722">A bilinear form for a prime length DFT can be obtained by
+making minor changes to a bilinear form for circular convolution.
+This relies on Rader's
+observation that a prime <m:math><m:mi>p</m:mi></m:math> point DFT can
+be computed by computing a <m:math><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> point circular convolution
+and by performing some extra additions <link target-id="bid0"/>.
+It turns out that when the Winograd or the split nesting
+convolution algorithm is used, only two extra additions
+are required.
+After briefly reviewing Rader's conversion of a prime length
+DFT in to a circular convolution,
+we will discuss a bilinear form for the DFT.</para>
+      <section id="uid1">
+        <title>Rader's Permutation</title>
+        <para id="id2253771">To explain Rader's conversion of a prime <m:math><m:mi>p</m:mi></m:math> point DFT
+into a <m:math><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> point circular convolution <link target-id="bid1"/> we
+recall the definition of the DFT</para>
+        <equation id="id2253804"><m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>k</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>=</m:mo>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∑</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>n</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:mi>x</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>n</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:msup>
+                <m:mi>W</m:mi>
+                <m:mrow>
+                  <m:mi>k</m:mi>
+                  <m:mi>n</m:mi>
+                </m:mrow>
+              </m:msup>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2253872">with <m:math>
+<m:mrow>
+<m:mi>W</m:mi>
+<m:mo>=</m:mo>
+<m:mo form="prefix">exp</m:mo>
+<m:mrow>
+<m:mo>-</m:mo>
+<m:mo>j</m:mo>
+<m:mn>2</m:mn>
+<m:mi>π</m:mi>
+<m:mo>/</m:mo>
+<m:mi>p</m:mi>
+</m:mrow>
+</m:mrow>
+</m:math>.
+
+
+Also recall that a primitive root of <m:math>
+<m:mi>p</m:mi>
+</m:math>
+
+ is an integer 
+
+<m:math>
+<m:mi>r</m:mi>
+</m:math> 
+
+such that
+
+<m:math>
+<m:mrow>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:msup>
+<m:mi>r</m:mi>
+<m:mi>m</m:mi>
+</m:msup>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mi>p</m:mi>
+</m:msub>
+</m:mrow>
+</m:math>
+
+maps the integers 
+
+<m:math>
+<m:mrow>
+<m:mi>m</m:mi>
+<m:mo>=</m:mo>
+<m:mn>0</m:mn>
+<m:mo>,</m:mo>
+<m:mo>⋯</m:mo>
+<m:mo>,</m:mo>
+<m:mi>p</m:mi>
+<m:mo>-</m:mo>
+<m:mn>2</m:mn>
+</m:mrow>
+</m:math> 
+
+to the integers 
+
+<m:math>
+<m:mrow>
+<m:mn>1</m:mn>
+<m:mo>,</m:mo>
+<m:mo>⋯</m:mo>
+<m:mo>,</m:mo>
+<m:mi>p</m:mi>
+<m:mo>-</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:math>.
+
+
+Letting 
+<m:math>
+<m:mrow>
+<m:mi>n</m:mi>
+<m:mo>=</m:mo>
+<m:msup>
+<m:mi>r</m:mi>
+<m:mrow>
+<m:mo>-</m:mo>
+<m:mi>m</m:mi>
+</m:mrow>
+</m:msup>
+</m:mrow>
+</m:math> 
+
+and 
+
+
+<m:math>
+<m:mrow>
+<m:mi>k</m:mi>
+<m:mo>=</m:mo>
+<m:msup>
+<m:mi>r</m:mi>
+<m:mi>l</m:mi>
+</m:msup>
+</m:mrow>
+</m:math>, 
+
+where 
+
+<m:math>
+<m:msup>
+<m:mi>r</m:mi>
+<m:mrow>
+<m:mo>-</m:mo>
+<m:mi>m</m:mi>
+</m:mrow>
+</m:msup>
+</m:math> 
+
+is the
+inverse of 
+
+<m:math>
+<m:msup>
+<m:mi>r</m:mi>
+<m:mi>m</m:mi>
+</m:msup>
+</m:math> 
+
+modulo 
+
+<m:math>
+<m:mi>p</m:mi>
+</m:math>, 
+
+the DFT becomes</para>
+        <equation id="id2254326"><m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:msup>
+                  <m:mi>r</m:mi>
+                  <m:mi>l</m:mi>
+                </m:msup>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>=</m:mo>
+              <m:mi>x</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mn>0</m:mn>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>+</m:mo>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∑</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>m</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>2</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:mi>x</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:msup>
+                  <m:mi>r</m:mi>
+                  <m:mrow>
+                    <m:mo>-</m:mo>
+                    <m:mi>m</m:mi>
+                  </m:mrow>
+                </m:msup>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:msup>
+                <m:mi>W</m:mi>
+                <m:mrow>
+                  <m:msup>
+                    <m:mi>r</m:mi>
+                    <m:mi>l</m:mi>
+                  </m:msup>
+                  <m:msup>
+                    <m:mi>r</m:mi>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mi>m</m:mi>
+                    </m:mrow>
+                  </m:msup>
+                </m:mrow>
+              </m:msup>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2254431">for <m:math><m:mrow><m:mi>l</m:mi><m:mo>=</m:mo><m:mn>0</m:mn><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>2</m:mn></m:mrow></m:math>.
+The `DC' term fis given by
+<m:math><m:mrow><m:mi>y</m:mi><m:mrow><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msubsup><m:mo>∑</m:mo><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:mn>0</m:mn></m:mrow><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msubsup><m:mi>x</m:mi><m:mrow><m:mo>(</m:mo><m:mi>n</m:mi><m:mo>)</m:mo></m:mrow><m:mo>.</m:mo></m:mrow></m:math>
+By defining new functions</para>
+        <equation id="id2254517"><m:math mode="display">
+            <m:mrow>
+              <m:msup>
+                <m:mi>x</m:mi>
+                <m:mo>′</m:mo>
+              </m:msup>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>m</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>=</m:mo>
+              <m:mi>x</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:msup>
+                  <m:mi>r</m:mi>
+                  <m:mrow>
+                    <m:mo>-</m:mo>
+                    <m:mi>m</m:mi>
+                  </m:mrow>
+                </m:msup>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>,</m:mo>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:msup>
+                <m:mi>y</m:mi>
+                <m:mo>′</m:mo>
+              </m:msup>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>m</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>=</m:mo>
+              <m:mi>y</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:msup>
+                  <m:mi>r</m:mi>
+                  <m:mi>m</m:mi>
+                </m:msup>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>,</m:mo>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:msup>
+                <m:mi>W</m:mi>
+                <m:mo>′</m:mo>
+              </m:msup>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>m</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>=</m:mo>
+              <m:msup>
+                <m:mi>W</m:mi>
+                <m:msup>
+                  <m:mi>r</m:mi>
+                  <m:mi>m</m:mi>
+                </m:msup>
+              </m:msup>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2254652">which are simply permuted versions of the original sequences,
+the DFT becomes</para>
+        <equation id="uid2"><m:math mode="display">
+            <m:mrow>
+              <m:msup>
+                <m:mi>y</m:mi>
+                <m:mo>′</m:mo>
+              </m:msup>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>l</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>=</m:mo>
+              <m:mi>x</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mn>0</m:mn>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>+</m:mo>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∑</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>m</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>2</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:msup>
+                <m:mi>x</m:mi>
+                <m:mo>′</m:mo>
+              </m:msup>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>m</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:msup>
+                <m:mi>W</m:mi>
+                <m:mo>′</m:mo>
+              </m:msup>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>l</m:mi>
+                <m:mo>-</m:mo>
+                <m:mi>m</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2254754">for <m:math><m:mrow><m:mi>l</m:mi><m:mo>=</m:mo><m:mn>0</m:mn><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>2</m:mn></m:mrow></m:math>.
+This equation describes circular convolution and therefore
+any circular convolution algorithm can be used to compute
+a prime length DFT.
+It is only necessary to
+(i) permute the input, the roots of unity
+and the output,
+(ii) add <m:math><m:mrow><m:mi>x</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math> to each term in <link target-id="uid2"/>
+and
+(iii) compute the DC term.</para>
+        <para id="id2254826">To describe a bilinear form for the DFT we first define a
+permutation matrix <m:math><m:mi>Q</m:mi></m:math> for the permutation above.
+If <m:math><m:mi>p</m:mi></m:math> is a prime and <m:math><m:mi>r</m:mi></m:math> is a primitive root of <m:math><m:mi>p</m:mi></m:math>, then
+let <m:math><m:msub><m:mi>Q</m:mi><m:mi>r</m:mi></m:msub></m:math> be the permutation matrix defined by</para>
+        <equation id="id2254880"><m:math mode="display">
+            <m:mrow>
+              <m:mi>Q</m:mi>
+              <m:msub>
+                <m:mi>e</m:mi>
+                <m:mrow>
+                  <m:mspace width="3.33333pt"/>
+                  <m:mo>〈</m:mo>
+                  <m:mspace width="0.277778em"/>
+                  <m:msup>
+                    <m:mi>r</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msup>
+<m:msub>
+<m:mo>〉</m:mo>
+
+                  <m:mi>p</m:mi>
+</m:msub>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:msub>
+                <m:mi>e</m:mi>
+                <m:mi>k</m:mi>
+              </m:msub>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2254932">for <m:math><m:mrow><m:mn>0</m:mn><m:mo>≤</m:mo><m:mi>k</m:mi><m:mo>≤</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>2</m:mn></m:mrow></m:math> where <m:math><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:math> is the <m:math><m:msup><m:mi>k</m:mi><m:mrow><m:mi>t</m:mi><m:mi>h</m:mi></m:mrow></m:msup></m:math> standard basis vector.
+Let the <m:math><m:mover accent="true"><m:mi>w</m:mi><m:mo>˜</m:mo></m:mover></m:math> be a <m:math><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> point vector of the roots of unity:</para>
+        <equation id="id2255020">
+          <m:math mode="display">
+            <m:mrow>
+              <m:mover accent="true">
+                <m:mi>w</m:mi>
+                <m:mo>˜</m:mo>
+              </m:mover>
+              <m:mo>=</m:mo>
+              <m:msup>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+                  <m:msup>
+                    <m:mi>W</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msup>
+                  <m:mo>,</m:mo>
+                  <m:mo>⋯</m:mo>
+                  <m:mo>,</m:mo>
+                  <m:msup>
+                    <m:mi>W</m:mi>
+                    <m:mrow>
+                      <m:mi>p</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msup>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2255079">If <m:math><m:mi>s</m:mi></m:math> is the inverse of <m:math><m:mi>r</m:mi></m:math> modulo <m:math><m:mi>p</m:mi></m:math> (that is, <m:math><m:mrow><m:mi>r</m:mi><m:mi>s</m:mi><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow></m:math> modulo <m:math><m:mi>p</m:mi></m:math>)
+and <m:math><m:mrow><m:mover accent="true"><m:mi>x</m:mi><m:mo>˜</m:mo></m:mover><m:mo>=</m:mo><m:msup><m:mrow><m:mo>(</m:mo><m:mi>x</m:mi><m:mrow><m:mo>(</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mi>x</m:mi><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup></m:mrow></m:math>, then
+the circular convolution of <link target-id="uid2"/> can be computed with the
+bilinear form of <link target-id=""/>:</para>
+        <equation id="uid3">
+          <m:math mode="display">
+            <m:mrow>
+              <m:msubsup>
+                <m:mi>Q</m:mi>
+                <m:mi>s</m:mi>
+                <m:mi>t</m:mi>
+              </m:msubsup>
+              <m:mi>J</m:mi>
+              <m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>B</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:mfenced separators="" open="{" close="}">
+                <m:msup>
+                  <m:mi>C</m:mi>
+                  <m:mi>t</m:mi>
+                </m:msup>
+                <m:msup>
+                  <m:mi>R</m:mi>
+                  <m:mrow>
+                    <m:mo>-</m:mo>
+                    <m:mi>t</m:mi>
+                  </m:mrow>
+                </m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>J</m:mi>
+                <m:msub>
+                  <m:mi>Q</m:mi>
+                  <m:mi>s</m:mi>
+                </m:msub>
+                <m:mover accent="true">
+                  <m:mi>w</m:mi>
+                  <m:mo>˜</m:mo>
+                </m:mover>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:msub>
+                  <m:mi>Q</m:mi>
+                  <m:mi>r</m:mi>
+                </m:msub>
+                <m:mover accent="true">
+                  <m:mi>x</m:mi>
+                  <m:mo>˜</m:mo>
+                </m:mover>
+              </m:mfenced>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2255320">This bilinear form does not compute <m:math><m:mrow><m:mi>y</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math>, the DC term.
+Furthermore, it is still necessary to add the <m:math><m:mrow><m:mi>x</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math> term
+to each of the elements of <link target-id="uid3"/> to
+obtain <m:math><m:mrow><m:mi>y</m:mi><m:mo>(</m:mo><m:mn>1</m:mn><m:mo>)</m:mo><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mi>y</m:mi><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow></m:math>.</para>
+      </section>
+      <section id="uid4">
+        <title>Calculation of the DC term</title>
+        <para id="id2255408">The computation of <m:math><m:mrow><m:mi>y</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math> turns out to be very simple when the bilinear form
+<link target-id="uid3"/> is used to compute the circular convolution in <link target-id="uid2"/>.
+The first element of <m:math><m:mrow><m:mi>A</m:mi><m:mi>R</m:mi><m:mi>P</m:mi><m:msub><m:mi>Q</m:mi><m:mi>r</m:mi></m:msub><m:mover accent="true"><m:mi>x</m:mi><m:mo>˜</m:mo></m:mover></m:mrow></m:math> in <link target-id="uid3"/> is the residue modulo
+the polynomial <m:math><m:mrow><m:mi>s</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>, that is, the first element of this vector is the
+sum of the elements of <m:math><m:mover accent="true"><m:mi>x</m:mi><m:mo>˜</m:mo></m:mover></m:math>.
+(The first row of the matrix, <m:math><m:mi>R</m:mi></m:math>, representing the reduction operation
+is a row of 1's, and the matrices <m:math><m:mi>P</m:mi></m:math> and <m:math><m:msub><m:mi>Q</m:mi><m:mi>r</m:mi></m:msub></m:math> are permutation matrices.)
+Therefore, the DC term can be computed by adding the first element of <m:math><m:mrow><m:mi>A</m:mi><m:mi>R</m:mi><m:mi>P</m:mi><m:msub><m:mi>Q</m:mi><m:mi>r</m:mi></m:msub><m:mover accent="true"><m:mi>x</m:mi><m:mo>˜</m:mo></m:mover></m:mrow></m:math>
+to <m:math><m:mrow><m:mi>x</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math>.
+Hence, when the Winograd or split nesting algorithm is used to perform the
+circular convolution of <link target-id="uid3"/>, the computation of the DC term
+requires only one extra complex addition for complex data.</para>
+        <para id="id2255593">The addition <m:math><m:mrow><m:mi>x</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math> to each of the elements of <link target-id="uid3"/>
+also requires only one complex addition.
+By adding <m:math><m:mrow><m:mi>x</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math> to the first element of
+<m:math><m:mfenced separators="" open="{" close="}"><m:msup><m:mi>C</m:mi><m:mi>t</m:mi></m:msup><m:msup><m:mi>R</m:mi><m:mrow><m:mo>-</m:mo><m:mi>t</m:mi></m:mrow></m:msup><m:mi>P</m:mi><m:mi>J</m:mi><m:msub><m:mi>Q</m:mi><m:mi>s</m:mi></m:msub><m:mover accent="true"><m:mi>w</m:mi><m:mo>˜</m:mo></m:mover><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>R</m:mi><m:mi>P</m:mi><m:msub><m:mi>Q</m:mi><m:mi>r</m:mi></m:msub><m:mover accent="true"><m:mi>x</m:mi><m:mo>˜</m:mo></m:mover></m:mfenced></m:math> in <link target-id="uid3"/>
+and applying <m:math><m:mrow><m:msubsup><m:mi>Q</m:mi><m:mi>s</m:mi><m:mi>t</m:mi></m:msubsup><m:mi>J</m:mi><m:msup><m:mi>P</m:mi><m:mi>t</m:mi></m:msup><m:msup><m:mi>R</m:mi><m:mi>t</m:mi></m:msup></m:mrow></m:math> to the result, <m:math><m:mrow><m:mi>x</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math> is added to each element.
+(Again, this is because the first column of <m:math><m:msup><m:mi>R</m:mi><m:mi>t</m:mi></m:msup></m:math> is a column of 1's,
+and the matrices <m:math><m:msubsup><m:mi>Q</m:mi><m:mi>s</m:mi><m:mi>t</m:mi></m:msubsup></m:math>, <m:math><m:mi>J</m:mi></m:math> and <m:math><m:msup><m:mi>P</m:mi><m:mi>t</m:mi></m:msup></m:math> are permutation matrices.)</para>
+        <para id="id2255829">Although the DFT can be computed by making these two extra additions,
+this organization of additions does not yield a bilinear form.
+However, by making a minor modification, a bilinear form can be retrieved.
+The method described above can be illustrated in <link target-id="uid5"/> with <m:math><m:mrow><m:mi>u</m:mi><m:mo>=</m:mo><m:msup><m:mi>C</m:mi><m:mi>t</m:mi></m:msup><m:msup><m:mi>R</m:mi><m:mrow><m:mo>-</m:mo><m:mi>t</m:mi></m:mrow></m:msup><m:mi>P</m:mi><m:mi>J</m:mi><m:msub><m:mi>Q</m:mi><m:mi>s</m:mi></m:msub><m:mover accent="true"><m:mi>w</m:mi><m:mo>˜</m:mo></m:mover></m:mrow></m:math>.</para>
+        <figure id="uid5" orient="horizontal">
+          <media id="id6777001" alt=""><image src="../../media/fig1.png" mime-type="image/png" width="390"/><image for="pdf" src="../../media/fig1.eps" mime-type="application/postscript"/></media>
+          <caption>The flow graph for the computation of the DFT.</caption>
+        </figure>
+        <para id="id2255903">Clearly, the structure highlighted in the dashed box can be
+replaced by the structure in <link target-id="uid6"/>.</para>
+        <figure id="uid6" orient="horizontal">
+          <media id="id12258535" alt=""><image src="../../media/figB1.png" mime-type="image/png" width="234"/><image for="pdf" src="../../media/figB1.eps" mime-type="application/postscript"/></media>
+          <caption>The flow graph for the bilinear form.</caption>
+        </figure>
+        <para id="id2255922">By substituting the second structure for the first, a bilinear
+form is obtained.
+The resulting bilinear form for a prime length DFT is</para>
+<!--empty paragraphs get left behind.-->
+        <equation id="uid7"><m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msubsup>
+                          <m:mi>Q</m:mi>
+                          <m:mi>s</m:mi>
+                          <m:mi>t</m:mi>
+                        </m:msubsup>
+                        <m:mi>J</m:mi>
+                        <m:msup>
+                          <m:mi>P</m:mi>
+                          <m:mi>t</m:mi>
+                        </m:msup>
+                        <m:msup>
+                          <m:mi>R</m:mi>
+                          <m:mi>t</m:mi>
+                        </m:msup>
+                        <m:msup>
+                          <m:mi>B</m:mi>
+                          <m:mi>t</m:mi>
+                        </m:msup>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:msubsup>
+                <m:mi>U</m:mi>
+                <m:mi>p</m:mi>
+                <m:mi>t</m:mi>
+              </m:msubsup>
+              <m:mfenced separators="" open="{" close="}">
+                <m:msub>
+                  <m:mi>V</m:mi>
+                  <m:mi>p</m:mi>
+                </m:msub>
+                <m:mfenced open="[" close="]">
+                  <m:mtable>
+                    <m:mtr>
+                      <m:mtd>
+                        <m:mn>1</m:mn>
+                      </m:mtd>
+                      <m:mtd/>
+                      </m:mtr>
+<m:mtr>
+                      <m:mtd/>
+                      <m:mtd>
+                        <m:mrow>
+                          <m:msup>
+                            <m:mi>C</m:mi>
+                            <m:mi>t</m:mi>
+                          </m:msup>
+                          <m:msup>
+                            <m:mi>R</m:mi>
+                            <m:mrow>
+                              <m:mo>-</m:mo>
+                              <m:mi>t</m:mi>
+                            </m:mrow>
+                          </m:msup>
+                          <m:mi>P</m:mi>
+                          <m:mi>J</m:mi>
+                          <m:msub>
+                            <m:mi>Q</m:mi>
+                            <m:mi>s</m:mi>
+                          </m:msub>
+                        </m:mrow>
+                      </m:mtd>
+                    </m:mtr>
+                  </m:mtable>
+                </m:mfenced>
+                <m:mi>w</m:mi>
+                <m:mo>*</m:mo>
+                <m:msub>
+                  <m:mi>U</m:mi>
+                  <m:mi>p</m:mi>
+                </m:msub>
+                <m:mfenced open="[" close="]">
+                  <m:mtable>
+                    <m:mtr>
+                      <m:mtd>
+                        <m:mn>1</m:mn>
+                      </m:mtd>
+                      <m:mtd/>
+                        </m:mtr>
+<m:mtr>
+                      <m:mtd/>
+                      <m:mtd>
+                        <m:mrow>
+                          <m:mi>A</m:mi>
+                          <m:mi>R</m:mi>
+                          <m:mi>P</m:mi>
+                          <m:msub>
+                            <m:mi>Q</m:mi>
+                            <m:mi>r</m:mi>
+                          </m:msub>
+                        </m:mrow>
+                      </m:mtd>
+                    </m:mtr>
+                  </m:mtable>
+                </m:mfenced>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2256115">where <m:math><m:mrow><m:mi>w</m:mi><m:mo>=</m:mo><m:msup><m:mrow><m:mo>(</m:mo><m:msup><m:mi>W</m:mi><m:mn>0</m:mn></m:msup><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msup><m:mi>W</m:mi><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup></m:mrow></m:math>,
+<m:math><m:mrow><m:mi>x</m:mi><m:mo>=</m:mo><m:msup><m:mrow><m:mo>(</m:mo><m:mi>x</m:mi><m:mrow><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mi>x</m:mi><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup></m:mrow></m:math>,
+and where <m:math><m:msub><m:mi>U</m:mi><m:mi>p</m:mi></m:msub></m:math> is the matrix with the form</para>
+        <equation id="id2256239"><m:math mode="display">
+            <m:mrow>
+              <m:msub>
+                <m:mi>U</m:mi>
+                <m:mi>p</m:mi>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                
+<m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+<m:mtd/>                    
+<m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>                    
+<m:mtd>
+                      <m:mo>⋱</m:mo>
+                    </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd/>
+                    <m:mtd/>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2256305">and <m:math><m:msub><m:mi>V</m:mi><m:mi>p</m:mi></m:msub></m:math> is the matrix with the form</para>
+        <equation id="id2256326"><m:math mode="display">
+            <m:mrow>
+              <m:msub>
+                <m:mi>U</m:mi>
+                <m:mi>p</m:mi>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                
+<m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                    
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mn>-1</m:mn>
+</m:mtd>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+<m:mtd/>                    
+<m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>                    
+<m:mtd>
+                      <m:mo>⋱</m:mo>
+                    </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd/>
+                    <m:mtd/>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+      </section>
+    </section>
+  </content>
+  <bib:file>
+    <bib:entry id="bid1">
+      <bib:incollection>
+<!--required fields-->
+        <bib:author>Burrus, C. S.</bib:author>
+        <bib:title>Efficient Fourier Transform and Convolution Algorithms</bib:title>
+        <bib:booktitle>Advanced Topics in Signal Processing</bib:booktitle>
+        <bib:publisher>Prentice Hall</bib:publisher>
+        <bib:year>1988</bib:year>
+<!--optional fields-->
+        <bib:editor>Lim, Jae S. and Oppenheim, Alan V.</bib:editor>
+        <bib:number/>
+        <bib:series/>
+        <bib:type/>
+        <bib:chapter/>
+        <bib:pages/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:incollection>
+    </bib:entry>
+    <bib:entry id="bid0">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Rader, C. M.</bib:author>
+        <bib:title>Discrete Fourier Transform When the Number of Data Samples is Prime</bib:title>
+        <bib:journal>Proc. IEEE</bib:journal>
+        <bib:year>1968</bib:year>
+<!--optional fields-->
+        <bib:volume>56</bib:volume>
+        <bib:number>6</bib:number>
+        <bib:pages>1107-1108</bib:pages>
+        <bib:month>June</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+  </bib:file>
+</document>

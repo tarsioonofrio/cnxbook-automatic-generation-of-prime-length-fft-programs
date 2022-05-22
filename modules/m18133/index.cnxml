@@ -1,0 +1,2557 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Bilinear Forms for Circular Convolution</title>
+  <metadata>
+  <md:content-id>m18133</md:content-id><md:title>Bilinear Forms for Circular Convolution</md:title>
+  <md:abstract>This collection of modules is from a Rice University, ECE Department Technical Report written around September 1994. It grew out of the doctoral and post doctoral research of Ivan Selesnick working with Prof. C. Sidney Burrus at Rice. Earlier reports on this work were published in the ICASSP and ISCAS conference proceedings in 1992-94 and a fairly complete report was published in the IEEE Transaction on Signal Processing in January 1996.</md:abstract>
+  <md:uuid>869a7e76-7108-4006-a37f-60894b1bb59c</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Bilinear Forms for Circular Convolution</title>
+      <para id="id2253722">A basic technique in fast algorithms for convolution is
+that of interpolation.
+That is, two polynomials are evaluated at some common points
+and these values are multiplied <link target-id="bid0"/>, <link target-id="bid1"/>, <link target-id="bid2"/>.
+By interpolating these products,
+the product of the two original polynomials can be determined.
+In the Winograd short convolution algorithms, this technique
+is used and the common points of evaluation are the simple integers,
+0, 1, and <m:math><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>.
+Indeed, the computational savings of the interpolation technique
+depends on the use of special points at which to interpolate.
+In the Winograd algorithm the computational savings
+come from the simplicity of the small integers.
+(As an algorithm for convolution, the FFT interpolates over the
+roots of unity.)
+This interpolation method is often called the Toom-Cook method
+and it is given by two matrices that describe a bilinear form.</para>
+      <para id="id2253769">We use bilinear forms to give a matrix formulation of the split
+nesting algorithm.
+The split nesting algorithm combines smaller convolution algorithms
+to obtain algorithms for longer lengths.
+We use the Kronecker product to explicitly describe the way in which
+smaller convolution algorithms are appropriately combined.</para>
+      <section id="uid1">
+        <title>The Scalar Toom-Cook Method</title>
+        <para id="id2253785">First we consider the linear convolution of two <m:math><m:mi>n</m:mi></m:math> point
+sequences. Recall that
+the linear convolution of <m:math><m:mi>h</m:mi></m:math> and <m:math><m:mi>x</m:mi></m:math> can be represented
+by a matrix vector product.
+When <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:mn>3</m:mn></m:mrow></m:math>:</para>
+        <equation id="id2253833"><m:math mode="display">
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+<m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                      <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>                    
+<m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+</m:mtr>
+<m:mtr>         
+<m:mtd/>
+           <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+<m:mtd/>                    
+<m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+       
+
+       <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                        <m:msub>
+                          <m:mi>x</m:mi>
+                          <m:mn>0</m:mn>
+                        </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                       
+ <m:msub>
+                          <m:mi>x</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                        
+<m:msub>
+                          <m:mi>x</m:mi>
+                          <m:mn>2</m:mn>
+                        </m:msub>
+                      
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            
+          </m:math>
+        </equation>
+        <para id="id2253968">This linear convolution matrix can be written as
+<m:math><m:mrow><m:msub><m:mi>h</m:mi><m:mn>0</m:mn></m:msub><m:msub><m:mi>H</m:mi><m:mn>0</m:mn></m:msub><m:mo>+</m:mo><m:msub><m:mi>h</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>H</m:mi><m:mn>1</m:mn></m:msub><m:mo>+</m:mo><m:msub><m:mi>h</m:mi><m:mn>2</m:mn></m:msub><m:msub><m:mi>H</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math> where
+<m:math><m:msub><m:mi>H</m:mi><m:mi>k</m:mi></m:msub></m:math> are clear.</para>
+        <para id="id2254282">The product <m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:munderover><m:mo>∑</m:mo><m:mrow><m:mi>k</m:mi><m:mo>=</m:mo><m:mn>0</m:mn></m:mrow><m:mrow><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:munderover><m:msub><m:mi>h</m:mi><m:mi>k</m:mi></m:msub><m:msub><m:mi>H</m:mi><m:mi>k</m:mi></m:msub><m:mi>x</m:mi></m:mrow></m:mstyle></m:math>
+can be found using the Toom-Cook algorithm, an
+interpolation method.
+Choose <m:math><m:mrow><m:mn>2</m:mn><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> interpolation points, <m:math><m:mrow><m:msub><m:mi>i</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>i</m:mi><m:mrow><m:mn>2</m:mn><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub></m:mrow></m:math>,
+and let <m:math><m:mi>A</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> be matrices given by</para>
+        <equation id="uid2"><m:math mode="display">
+            <m:mrow>
+              <m:mi>A</m:mi>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:msubsup>
+                        <m:mi>i</m:mi>
+                        <m:mn>1</m:mn>
+                        <m:mn>0</m:mn>
+                      </m:msubsup>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mo>⋯</m:mo>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msubsup>
+                        <m:mi>i</m:mi>
+                        <m:mn>1</m:mn>
+                        <m:mrow>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msubsup>
+                    </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                    <m:mtd>
+                      <m:mo>⋮</m:mo>
+                    </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd>
+                      <m:msubsup>
+                        <m:mi>i</m:mi>
+                        <m:mrow>
+                          <m:mn>2</m:mn>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                        <m:mn>0</m:mn>
+                      </m:msubsup>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mo>⋯</m:mo>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msubsup>
+                        <m:mi>i</m:mi>
+                        <m:mrow>
+                          <m:mn>2</m:mn>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                        <m:mrow>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msubsup>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mtext>and</m:mtext>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mi>C</m:mi>
+              <m:mo>=</m:mo>
+              <m:msup>
+                <m:mfenced open="[" close="]">
+                  <m:mtable>
+                    <m:mtr>
+                      <m:mtd>
+                        <m:msubsup>
+                          <m:mi>i</m:mi>
+                          <m:mn>1</m:mn>
+                          <m:mn>0</m:mn>
+                        </m:msubsup>
+                      </m:mtd>
+                      <m:mtd>
+                        <m:mo>⋯</m:mo>
+                      </m:mtd>
+                      <m:mtd>
+                        <m:msubsup>
+                          <m:mi>i</m:mi>
+                          <m:mn>1</m:mn>
+                          <m:mrow>
+                            <m:mn>2</m:mn>
+                            <m:mi>n</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>2</m:mn>
+                          </m:mrow>
+                        </m:msubsup>
+                      </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                      <m:mtd>
+                        <m:mo>⋮</m:mo>
+                      </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                      <m:mtd>
+                        <m:msubsup>
+                          <m:mi>i</m:mi>
+                          <m:mrow>
+                            <m:mn>2</m:mn>
+                            <m:mi>n</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                          <m:mn>0</m:mn>
+                        </m:msubsup>
+                      </m:mtd>
+                      <m:mtd>
+                        <m:mo>⋯</m:mo>
+                      </m:mtd>
+                      <m:mtd>
+                        <m:msubsup>
+                          <m:mi>i</m:mi>
+                          <m:mrow>
+                            <m:mn>2</m:mn>
+                            <m:mi>n</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                          <m:mrow>
+                            <m:mn>2</m:mn>
+                            <m:mi>n</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>2</m:mn>
+                          </m:mrow>
+                        </m:msubsup>
+                      </m:mtd>
+                    </m:mtr>
+                  </m:mtable>
+                </m:mfenced>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2254648">That is, <m:math><m:mi>A</m:mi></m:math> is a degree <m:math><m:mrow><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> Vandermonde matrix and
+<m:math><m:mi>C</m:mi></m:math> is the inverse of the degree <m:math><m:mrow><m:mn>2</m:mn><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>2</m:mn></m:mrow></m:math> Vandermonde matrix
+specified by the same points specifying <m:math><m:mi>A</m:mi></m:math>.
+With these matrices, one has</para>
+        <equation id="uid3"><m:math mode="display">
+            <m:mrow>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∑</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>k</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>n</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:msub>
+                <m:mi>h</m:mi>
+                <m:mi>k</m:mi>
+              </m:msub>
+              <m:msub>
+                <m:mi>H</m:mi>
+                <m:mi>k</m:mi>
+              </m:msub>
+              <m:mi>x</m:mi>
+              <m:mo>=</m:mo>
+              <m:mi>C</m:mi>
+              <m:mfenced separators="" open="{" close="}">
+                <m:mi>A</m:mi>
+                <m:mi>h</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2254784">where <m:math><m:mo>*</m:mo></m:math> denotes point by point multiplication.
+The terms <m:math><m:mrow><m:mi>A</m:mi><m:mi>h</m:mi></m:mrow></m:math> and <m:math><m:mrow><m:mi>A</m:mi><m:mi>x</m:mi></m:mrow></m:math> are the values of
+<m:math><m:mrow><m:mi>H</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> and <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> at the points <m:math><m:mrow><m:msub><m:mi>i</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:msub><m:mi>i</m:mi><m:mrow><m:mn>2</m:mn><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub></m:mrow></m:math>.
+The point by point multiplication gives the
+values <m:math><m:mrow><m:mi>Y</m:mi><m:mrow><m:mo>(</m:mo><m:msub><m:mi>i</m:mi><m:mn>1</m:mn></m:msub><m:mo>)</m:mo></m:mrow><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mi>Y</m:mi><m:mrow><m:mo>(</m:mo><m:msub><m:mi>i</m:mi><m:mrow><m:mn>2</m:mn><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub><m:mo>)</m:mo></m:mrow></m:mrow></m:math>.
+The operation of <m:math><m:mi>C</m:mi></m:math> obtains the coefficients of
+<m:math><m:mrow><m:mi>Y</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> from its values at these points of evaluation.
+This is the bilinear form
+and it implies that</para>
+        <equation id="uid4"><m:math mode="display">
+            <m:mrow>
+              <m:msub>
+                <m:mi>H</m:mi>
+                <m:mi>k</m:mi>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:mi>Cdiag</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>A</m:mi>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mi>k</m:mi>
+                </m:msub>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mi>A</m:mi>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        
+        
+        <example id="element-901"><para id="element-339">
+If <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:mn>2</m:mn></m:mrow></m:math>, then equations <link target-id="uid3"/> and
+<link target-id="uid4"/> give
+</para>
+<equation id="id2255064"><m:math mode="display">
+            <m:mrow>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mn>0</m:mn>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>                        
+<m:msub>
+                          <m:mi>h</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+
+
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>h</m:mi>
+                          <m:mn>0</m:mn>
+                        </m:msub>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>
+                        <m:mn>0</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>h</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:mi>x</m:mi>
+              <m:mo>=</m:mo>
+              <m:mi>C</m:mi>
+              <m:mfenced separators="" open="{" close="}">
+                <m:mi>A</m:mi>
+                <m:mi>h</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation><para id="element-807">When the interpolation points are 0, 1,and <m:math><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>,</para>
+<equation id="id2255164"><m:math mode="display">
+            <m:mrow>
+              <m:mi>A</m:mi>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mn>0</m:mn>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>                        
+<m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mtext>and</m:mtext>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mspace width="0.277778em"/>
+              <m:mi>C</m:mi>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mn>0</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mn>0</m:mn>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>
+                        <m:mn>0</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>.</m:mo>
+                        <m:mn>5</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mo>.</m:mo>
+                        <m:mn>5</m:mn>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>.</m:mo>
+                        <m:mn>5</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>.</m:mo>
+                        <m:mn>5</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation></example>
+        
+        
+        
+        <para id="id2255299">However, <m:math><m:mi>A</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> do not need to be Vandermonde
+matrices as in <link target-id="uid2"/>.
+For example, see the two point linear convolution algorithm
+in the appendix.
+As long as <m:math><m:mi>A</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> are matrices such that
+<m:math><m:mrow><m:msub><m:mi>H</m:mi><m:mi>k</m:mi></m:msub><m:mo>=</m:mo><m:mi>Cdiag</m:mi><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub><m:mo>)</m:mo></m:mrow><m:mi>A</m:mi></m:mrow></m:math>, then the linear convolution
+of <m:math><m:mi>x</m:mi></m:math> and <m:math><m:mi>h</m:mi></m:math> is given by
+the bilinear form <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>C</m:mi><m:mo>{</m:mo><m:mi>A</m:mi><m:mi>h</m:mi><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>}</m:mo></m:mrow></m:math>.
+More generally, as long as <m:math><m:mi>A</m:mi></m:math>, <m:math><m:mi>B</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> are
+matrices satisfying <m:math><m:mrow><m:msub><m:mi>H</m:mi><m:mi>k</m:mi></m:msub><m:mo>=</m:mo><m:mi>Cdiag</m:mi><m:mrow><m:mo>(</m:mo><m:mi>B</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub><m:mo>)</m:mo></m:mrow><m:mi>A</m:mi></m:mrow></m:math>,
+then <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>C</m:mi><m:mo>{</m:mo><m:mi>B</m:mi><m:mi>h</m:mi><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>}</m:mo></m:mrow></m:math> computes the
+linear convolution of <m:math><m:mi>h</m:mi></m:math> and <m:math><m:mi>x</m:mi></m:math>.
+For convenience, if <m:math><m:mrow><m:mi>C</m:mi><m:mo>{</m:mo><m:mi>A</m:mi><m:mi>h</m:mi><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>}</m:mo></m:mrow></m:math>
+computes the <m:math><m:mi>n</m:mi></m:math> point linear convolution of <m:math><m:mi>h</m:mi></m:math> and <m:math><m:mi>x</m:mi></m:math>
+(both <m:math><m:mi>h</m:mi></m:math> and <m:math><m:mi>x</m:mi></m:math> are <m:math><m:mi>n</m:mi></m:math> point sequences),
+then we say “<m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>,</m:mo><m:mi>B</m:mi><m:mo>,</m:mo><m:mi>C</m:mi><m:mo>)</m:mo></m:mrow></m:math> describes a bilinear
+form for <m:math><m:mi>n</m:mi></m:math> point linear convolution."</para>
+        <para id="id2255668">Similarly, we can write a bilinear form for cyclotomic
+convolution.
+Let <m:math><m:mi>d</m:mi></m:math> be any positive integer and let <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+and <m:math><m:mrow><m:mi>H</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> be polynomials of degree
+<m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> where <m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mo>·</m:mo><m:mo>)</m:mo></m:mrow></m:math> is the Euler
+totient function.
+If <m:math><m:mi>A</m:mi></m:math>, <m:math><m:mi>B</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> are matrices
+satisfying <m:math><m:mrow><m:msup><m:mfenced separators="" open="(" close=")"><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub></m:msub></m:mfenced><m:mi>k</m:mi></m:msup><m:mo>=</m:mo><m:mi>Cdiag</m:mi><m:mrow><m:mo>(</m:mo><m:mi>B</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub><m:mo>)</m:mo></m:mrow><m:mi>A</m:mi></m:mrow></m:math> for <m:math><m:mrow><m:mn>0</m:mn><m:mo>≤</m:mo><m:mi>k</m:mi><m:mo>≤</m:mo><m:mi>φ</m:mi><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>,
+then the coefficients of <m:math><m:mrow><m:mi>Y</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mrow><m:mo>〈</m:mo><m:mi>X</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mi>H</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>〉</m:mo></m:mrow><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:msub></m:mrow></m:math>
+are given by <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>C</m:mi><m:mo>{</m:mo><m:mi>B</m:mi><m:mi>h</m:mi><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>}</m:mo></m:mrow></m:math>.
+As above, if <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>C</m:mi><m:mo>{</m:mo><m:mi>B</m:mi><m:mi>h</m:mi><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>}</m:mo></m:mrow></m:math> computes the
+<m:math><m:mi>d</m:mi></m:math>-cyclotomic convolution, then we say
+“<m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>,</m:mo><m:mi>B</m:mi><m:mo>,</m:mo><m:mi>C</m:mi><m:mo>)</m:mo></m:mrow></m:math> describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+convolution."</para>
+        <para id="id2256056">But since <m:math><m:msub><m:mrow><m:mo>〈</m:mo><m:mi>X</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mi>H</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>〉</m:mo></m:mrow><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:msub></m:math> can be found by computing
+the product of <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> and <m:math><m:mrow><m:mi>H</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> and reducing the
+result, a cyclotomic convolution algorithm
+can always be derived by following a linear
+convolution algorithm by the appropriate reduction
+operation:
+If <m:math><m:mi>G</m:mi></m:math> is the appropriate reduction matrix and if <m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>,</m:mo><m:mi>B</m:mi><m:mo>,</m:mo><m:mi>F</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for a <m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo></m:mrow></m:math> point
+<emphasis>linear</emphasis> convolution, then
+<m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>,</m:mo><m:mi>B</m:mi><m:mo>,</m:mo><m:mi>G</m:mi><m:mi>F</m:mi><m:mo>)</m:mo></m:mrow></m:math> describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+convolution.
+That is, <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>G</m:mi><m:mi>F</m:mi><m:mo>{</m:mo><m:mi>B</m:mi><m:mi>h</m:mi><m:mo>*</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>}</m:mo></m:mrow></m:math>
+computes the coefficients of <m:math><m:msub><m:mrow><m:mo>〈</m:mo><m:mi>X</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mi>H</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>〉</m:mo></m:mrow><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:msub></m:math>.</para>
+      </section>
+      <section id="uid5">
+        <title>Circular Convolution</title>
+        <para id="id2256344">By using the Chinese Remainder Theorem for polynomials,
+circular convolution can be decomposed into disjoint
+cyclotomic convolutions.
+Let <m:math><m:mi>p</m:mi></m:math> be a prime and consider <m:math><m:mi>p</m:mi></m:math> point circular
+convolution.
+Above we found that</para>
+        <equation id="id2256370"><m:math mode="display">
+            <m:mrow>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:mi>p</m:mi>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:msubsup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msubsup>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mi>p</m:mi>
+                        </m:msub>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mi>p</m:mi>
+              </m:msub>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2256438">and therefore</para>
+        <equation id="id2256444"><m:math mode="display">
+            <m:mrow>
+              <m:msubsup>
+                <m:mi>S</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mi>k</m:mi>
+              </m:msubsup>
+              <m:mo>=</m:mo>
+              <m:msubsup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msubsup>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                   </m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:msubsup>
+                        <m:mi>C</m:mi>
+                        <m:mrow>
+                          <m:msub>
+                            <m:mi>Φ</m:mi>
+                            <m:mi>p</m:mi>
+                          </m:msub>
+                        </m:mrow>
+                        <m:mi>k</m:mi>
+                      </m:msubsup>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mi>p</m:mi>
+              </m:msub>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2256524">If <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:mi>p</m:mi></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:mi>p</m:mi></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:mi>p</m:mi></m:msub><m:mo>)</m:mo></m:mrow></m:math> describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>p</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+convolution,
+then</para>
+        <equation id="id2256592"><m:math mode="display">
+            <m:mrow>
+              <m:msubsup>
+                <m:mi>S</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mi>k</m:mi>
+              </m:msubsup>
+              <m:mo>=</m:mo>
+              <m:msubsup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msubsup>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                  </m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+<m:mtext>diag</m:mtext>
+              <m:mfenced separators="" open="(" close=")">
+                <m:mfenced open="[" close="]">
+                  <m:mtable>
+                    <m:mtr>
+                      <m:mtd>
+                        <m:mn>1</m:mn>
+                      </m:mtd>
+                      <m:mtd/>
+               </m:mtr>
+<m:mtr>
+                      <m:mtd/>
+                      <m:mtd>
+                        <m:msub>
+                          <m:mi>B</m:mi>
+                          <m:mi>p</m:mi>
+                        </m:msub>
+                      </m:mtd>
+                    </m:mtr>
+                  </m:mtable>
+                </m:mfenced>
+                <m:msub>
+                  <m:mi>R</m:mi>
+                  <m:mi>p</m:mi>
+                </m:msub>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mi>k</m:mi>
+                </m:msub>
+              </m:mfenced>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd/>
+                      </m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mi>p</m:mi>
+              </m:msub>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2256732">and consequently the circular convolution of <m:math><m:mi>h</m:mi></m:math> and <m:math><m:mi>x</m:mi></m:math> can
+be computed by</para>
+        <equation id="id2256757">
+          <m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:msubsup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msubsup>
+              <m:mi>C</m:mi>
+              <m:mrow>
+                <m:mo>{</m:mo>
+                <m:mi>B</m:mi>
+                <m:msub>
+                  <m:mi>R</m:mi>
+                  <m:mi>p</m:mi>
+                </m:msub>
+                <m:mi>h</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:msub>
+                  <m:mi>R</m:mi>
+                  <m:mi>p</m:mi>
+                </m:msub>
+                <m:mi>x</m:mi>
+                <m:mo>}</m:mo>
+              </m:mrow>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2256820">where <m:math><m:mrow><m:mi>A</m:mi><m:mo>=</m:mo><m:mn>1</m:mn><m:mo>⊕</m:mo><m:msub><m:mi>A</m:mi><m:mi>p</m:mi></m:msub></m:mrow></m:math>, <m:math><m:mrow><m:mi>B</m:mi><m:mo>=</m:mo><m:mn>1</m:mn><m:mo>⊕</m:mo><m:msub><m:mi>B</m:mi><m:mi>p</m:mi></m:msub></m:mrow></m:math> and <m:math><m:mrow><m:mi>C</m:mi><m:mo>=</m:mo><m:mn>1</m:mn><m:mo>⊕</m:mo><m:msub><m:mi>C</m:mi><m:mi>p</m:mi></m:msub></m:mrow></m:math>.
+We say <m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>,</m:mo><m:mi>B</m:mi><m:mo>,</m:mo><m:mi>C</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:mi>p</m:mi></m:math> point circular convolution.
+Note that if <m:math><m:mrow><m:mo>(</m:mo><m:mi>D</m:mi><m:mo>,</m:mo><m:mi>E</m:mi><m:mo>,</m:mo><m:mi>F</m:mi><m:mo>)</m:mo></m:mrow></m:math> describes a <m:math><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow></m:math> point linear convolution
+then <m:math><m:msub><m:mi>A</m:mi><m:mi>p</m:mi></m:msub></m:math>, <m:math><m:msub><m:mi>B</m:mi><m:mi>p</m:mi></m:msub></m:math> and <m:math><m:msub><m:mi>C</m:mi><m:mi>p</m:mi></m:msub></m:math> can be taken to be
+<m:math><m:mrow><m:msub><m:mi>A</m:mi><m:mi>p</m:mi></m:msub><m:mo>=</m:mo><m:mi>D</m:mi></m:mrow></m:math>, <m:math><m:mrow><m:msub><m:mi>B</m:mi><m:mi>p</m:mi></m:msub><m:mo>=</m:mo><m:mi>E</m:mi></m:mrow></m:math> and <m:math><m:mrow><m:msub><m:mi>C</m:mi><m:mi>p</m:mi></m:msub><m:mo>=</m:mo><m:msub><m:mi>G</m:mi><m:mi>p</m:mi></m:msub><m:mi>F</m:mi></m:mrow></m:math> where <m:math><m:msub><m:mi>G</m:mi><m:mi>p</m:mi></m:msub></m:math> represents
+the appropriate reduction operations.
+Specifically, <m:math><m:msub><m:mi>G</m:mi><m:mi>p</m:mi></m:msub></m:math> is given by
+<link document="m18132" target-id="uid18">Equation 42 from Preliminaries</link>.</para>
+        <para id="id2257116">Next we consider <m:math><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:math> point circular convolution.
+Recall that
+<m:math><m:mrow><m:msub><m:mi>S</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub><m:mo>=</m:mo><m:msubsup><m:mi>R</m:mi><m:mrow><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:mrow><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msubsup><m:mfenced separators="" open="(" close=")"><m:msubsup><m:mo>⊕</m:mo><m:mrow><m:mi>i</m:mi><m:mo>=</m:mo><m:mn>0</m:mn></m:mrow><m:mi>e</m:mi></m:msubsup><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub></m:msub></m:mfenced><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub></m:mrow></m:math>
+as in <link document="m18132" target-id="uid4">Equation 27 from Preliminaries</link>
+so that the circular convolution is decomposed into
+a set of <m:math><m:mrow><m:mi>e</m:mi><m:mo>+</m:mo><m:mn>1</m:mn></m:mrow></m:math> disjoint <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> convolutions.
+If <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> convolution
+and if</para>
+        <equation id="id2257362">
+          <m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>A</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mi>p</m:mi>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mo>⋯</m:mo>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>e</m:mi>
+                      </m:msup>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>B</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mi>p</m:mi>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mo>⋯</m:mo>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>e</m:mi>
+                      </m:msup>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>C</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:mi>p</m:mi>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mo>⋯</m:mo>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>e</m:mi>
+                      </m:msup>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation>
+        <para id="id2257513">then <m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub><m:mo>,</m:mo><m:mi>B</m:mi><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub><m:mo>,</m:mo><m:msubsup><m:mi>R</m:mi><m:mrow><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:mrow><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msubsup><m:mi>C</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:math> point circular convolution.
+In particular, if
+<m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>D</m:mi><m:mi>d</m:mi></m:msub><m:mo>,</m:mo><m:msub><m:mi>E</m:mi><m:mi>d</m:mi></m:msub><m:mo>,</m:mo><m:msub><m:mi>F</m:mi><m:mi>d</m:mi></m:msub><m:mo>)</m:mo></m:mrow></m:math> describes a bilinear form for <m:math><m:mi>d</m:mi></m:math> point
+linear convolution, then <m:math><m:msub><m:mi>A</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub></m:math>, <m:math><m:msub><m:mi>B</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub></m:math> and <m:math><m:msub><m:mi>C</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub></m:math>
+can be taken to be</para>
+        <equation id="id2257711">
+          <m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>A</m:mi>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                    </m:msup>
+                  </m:msub>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:msub>
+                    <m:mi>D</m:mi>
+                    <m:mrow>
+                      <m:mi>φ</m:mi>
+                      <m:mo>(</m:mo>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msup>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>B</m:mi>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                    </m:msup>
+                  </m:msub>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:msub>
+                    <m:mi>E</m:mi>
+                    <m:mrow>
+                      <m:mi>φ</m:mi>
+                      <m:mo>(</m:mo>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msup>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>C</m:mi>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                    </m:msup>
+                  </m:msub>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>G</m:mi>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msup>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>F</m:mi>
+                      <m:mrow>
+                        <m:mi>φ</m:mi>
+                        <m:mo>(</m:mo>
+                        <m:msup>
+                          <m:mi>p</m:mi>
+                          <m:mi>i</m:mi>
+                        </m:msup>
+                        <m:mo>)</m:mo>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation>
+        <para id="id2257870">where <m:math><m:msub><m:mi>G</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub></m:math> represents the appropriate reduction
+operation and <m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mo>·</m:mo><m:mo>)</m:mo></m:mrow></m:math> is the Euler totient function.
+Specifically, <m:math><m:msub><m:mi>G</m:mi><m:msup><m:mi>p</m:mi><m:mi>i</m:mi></m:msup></m:msub></m:math> has the following form</para>
+        <equation id="uid6"><m:math mode="display">
+<m:mrow>              
+<m:msub>
+                <m:mi>G</m:mi>
+                <m:msup>
+                  <m:mi>p</m:mi>
+                  <m:mi>i</m:mi>
+                </m:msup>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mrow>
+                          <m:mrow>
+                            <m:mo>(</m:mo>
+                            <m:mi>p</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                            <m:mo>)</m:mo>
+                          </m:mrow>
+                          <m:msup>
+                            <m:mi>p</m:mi>
+                            <m:mrow>
+                              <m:mi>i</m:mi>
+                              <m:mo>-</m:mo>
+                              <m:mn>1</m:mn>
+                            </m:mrow>
+                          </m:msup>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:msub>
+                          
+                            <m:mn>1</m:mn>
+                          <m:mrow>
+                            <m:mi>-p</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                        </m:msub>
+                        <m:mo>⊗</m:mo>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:msup>
+                            <m:mi>p</m:mi>
+                            <m:mrow>
+                              <m:mi>i</m:mi>
+                              <m:mo>-</m:mo>
+                              <m:mn>1</m:mn>
+                            </m:mrow>
+                          </m:msup>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mfenced open="[" close="]">
+                        <m:mtable>
+                          <m:mtr>
+                            <m:mtd>
+                              
+                                <m:msub>
+                                  <m:mi>I</m:mi>
+                                  <m:mrow>
+                                    <m:mrow>
+                                      <m:mo>(</m:mo>
+                                      <m:mi>p</m:mi>
+                                      <m:mo>-</m:mo>
+                                      <m:mn>2</m:mn>
+                                      <m:mo>)</m:mo>
+                                    </m:mrow>
+                                    <m:msup>
+                                      <m:mi>p</m:mi>
+                                      <m:mrow>
+                                        <m:mi>i</m:mi>
+                                        <m:mo>-</m:mo>
+                                        <m:mn>1</m:mn>
+                                      </m:mrow>
+                                    </m:msup>
+                                    <m:mo>-</m:mo>
+                                    <m:mn>1</m:mn>
+                                  </m:mrow>
+                                </m:msub>
+</m:mtd>
+</m:mtr>
+
+<m:mtr>
+<m:mtd>                                
+<m:msub>
+                                  <m:mn>0</m:mn>
+                                  <m:mrow>
+                                    <m:msup>
+                                      <m:mi>p</m:mi>
+                                      <m:mrow>
+                                        <m:mi>i</m:mi>
+                                        <m:mo>-</m:mo>
+                                        <m:mn>1</m:mn>
+                                      </m:mrow>
+                                    </m:msup>
+                                    <m:mo>+</m:mo>
+                                    <m:mn>1</m:mn>
+                                    <m:mo>,</m:mo>
+                                    <m:mrow>
+                                      <m:mo>(</m:mo>
+                                      <m:mi>p</m:mi>
+                                      <m:mo>-</m:mo>
+                                      <m:mn>2</m:mn>
+                                      <m:mo>)</m:mo>
+                                    </m:mrow>
+                                    <m:msup>
+                                      <m:mi>p</m:mi>
+                                      <m:mrow>
+                                        <m:mi>i</m:mi>
+                                        <m:mo>-</m:mo>
+                                        <m:mn>1</m:mn>
+                                      </m:mrow>
+                                    </m:msup>
+                                    <m:mo>-</m:mo>
+                                    <m:mn>1</m:mn>
+                                  </m:mrow>
+                                </m:msub>
+                              
+                            </m:mtd>
+                          </m:mtr>
+                        </m:mtable>
+                      </m:mfenced>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+</m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2258144">if <m:math><m:mrow><m:mi>p</m:mi><m:mo>≥</m:mo><m:mn>3</m:mn></m:mrow></m:math>, while</para>
+        <equation id="uid7"><m:math mode="display">
+            <m:mrow>
+              <m:msub>
+                <m:mi>G</m:mi>
+                <m:msup>
+                  <m:mn>2</m:mn>
+                  <m:mi>i</m:mi>
+                </m:msup>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:msup>
+                          <m:mn>2</m:mn>
+                          <m:mrow>
+                            <m:mi>i</m:mi>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                        </m:msup>
+                      </m:msub>
+                    </m:mtd>
+
+                    <m:mtd>
+                      <m:mfenced open="[" close="]">
+                        <m:mtable>
+                          <m:mtr>
+                            <m:mtd>
+                              
+                                <m:mo>-</m:mo>
+                                <m:msub>
+                                  <m:mi>I</m:mi>
+                                  <m:mrow>
+                                    <m:msup>
+                                      <m:mn>2</m:mn>
+                                      <m:mrow>
+                                        <m:mi>i</m:mi>
+                                        <m:mo>-</m:mo>
+                                        <m:mn>1</m:mn>
+                                      </m:mrow>
+                                    </m:msup>
+                                    <m:mo>-</m:mo>
+                                    <m:mn>1</m:mn>
+                                  </m:mrow>
+                                </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                                
+<m:msub>
+                                  <m:mn>0</m:mn>
+                                  <m:mrow>
+                                    <m:mn>1</m:mn>
+                                    <m:mo>,</m:mo>
+                                    <m:msup>
+                                      <m:mn>2</m:mn>
+                                      <m:mrow>
+                                        <m:mi>i</m:mi>
+                                        <m:mo>-</m:mo>
+                                        <m:mn>1</m:mn>
+                                      </m:mrow>
+                                    </m:msup>
+                                    <m:mo>-</m:mo>
+                                    <m:mn>1</m:mn>
+                                  </m:mrow>
+                                </m:msub>
+                              
+                            </m:mtd>
+                          </m:mtr>
+                        </m:mtable>
+                      </m:mfenced>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2258284">Note that the matrix <m:math><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub></m:math>
+block diagonalizes <m:math><m:msub><m:mi>S</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub></m:math> and each diagonal block
+represents a cyclotomic convolution.
+Correspondingly, the matrices <m:math><m:mi>A</m:mi></m:math>, <m:math><m:mi>B</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> of
+the bilinear form also have a block diagonal structure.</para>
+      </section>
+      <section id="uid8">
+        <title>The Split Nesting Algorithm</title>
+        <para id="id2258367">We now describe the split-nesting algorithm for general
+length circular convolution <link target-id="bid2"/>.
+Let <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>⋯</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:math>
+where <m:math><m:msub><m:mi>p</m:mi><m:mi>i</m:mi></m:msub></m:math> are distinct primes.
+We have seen that</para>
+        <equation id="id2258439"><m:math mode="display">
+            <m:mrow>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:mi>n</m:mi>
+              </m:msub>
+              <m:mo>=</m:mo>
+              <m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mfenced separators="" open="(" close=")">
+                <m:munder>
+                  <m:mo>⊕</m:mo>
+                  <m:mrow>
+                    <m:mi>d</m:mi>
+                    <m:mo>|</m:mo>
+                    <m:mi>n</m:mi>
+                  </m:mrow>
+                </m:munder>
+                <m:mi>Ψ</m:mi>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+                  <m:mi>d</m:mi>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mfenced>
+              <m:mi>R</m:mi>
+              <m:mi>P</m:mi>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2258511">where <m:math><m:mi>P</m:mi></m:math> is the prime factor permutation
+<m:math><m:mrow><m:mi>P</m:mi><m:mo>=</m:mo><m:msub><m:mi>P</m:mi><m:mrow><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:msub></m:mrow></m:math>
+and <m:math><m:mi>R</m:mi></m:math> represents the reduction operations.
+For example, see <link document="m18132" target-id="uid22">Equation 46 in Preliminaries</link>.
+<m:math><m:mrow><m:mi>R</m:mi><m:mi>P</m:mi></m:mrow></m:math> block diagonalizes <m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math> and each diagonal
+block represents a multi-dimensional cyclotomic
+convolution.
+To obtain a bilinear form for a multi-dimensional convolution,
+we can combine bilinear forms for one-dimensional
+convolutions.
+If <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+convolution
+and if</para>
+        <equation id="id2258724">
+          <m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>A</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mo>⊕</m:mo>
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+                        <m:mo>|</m:mo>
+                        <m:mi>n</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mi>d</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>B</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mo>⊕</m:mo>
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+                        <m:mo>|</m:mo>
+                        <m:mi>n</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mi>d</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>C</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mo>⊕</m:mo>
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+                        <m:mo>|</m:mo>
+                        <m:mi>n</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:mi>d</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation>
+        <para id="id2258840">with</para>
+        <equation id="id2258846">
+          <m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>A</m:mi>
+                    <m:mi>d</m:mi>
+                  </m:msub>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mrow>
+                        <m:mi>p</m:mi>
+                        <m:mo>|</m:mo>
+                        <m:mi>d</m:mi>
+                        <m:mo>,</m:mo>
+                        <m:mi>p</m:mi>
+                        <m:mo>∈</m:mo>
+                        <m:mi mathvariant="script">P</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>H</m:mi>
+                          <m:mi>d</m:mi>
+                        </m:msub>
+                        <m:mrow>
+                          <m:mo>(</m:mo>
+                          <m:mi>p</m:mi>
+                          <m:mo>)</m:mo>
+                        </m:mrow>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>B</m:mi>
+                    <m:mi>d</m:mi>
+                  </m:msub>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mrow>
+                        <m:mi>p</m:mi>
+                        <m:mo>|</m:mo>
+                        <m:mi>d</m:mi>
+                        <m:mo>,</m:mo>
+                        <m:mi>p</m:mi>
+                        <m:mo>∈</m:mo>
+                        <m:mi mathvariant="script">P</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>H</m:mi>
+                          <m:mi>d</m:mi>
+                        </m:msub>
+                        <m:mrow>
+                          <m:mo>(</m:mo>
+                          <m:mi>p</m:mi>
+                          <m:mo>)</m:mo>
+                        </m:mrow>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mi>C</m:mi>
+                    <m:mi>d</m:mi>
+                  </m:msub>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mrow>
+                        <m:mi>p</m:mi>
+                        <m:mo>|</m:mo>
+                        <m:mi>d</m:mi>
+                        <m:mo>,</m:mo>
+                        <m:mi>p</m:mi>
+                        <m:mo>∈</m:mo>
+                        <m:mi mathvariant="script">P</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>H</m:mi>
+                          <m:mi>d</m:mi>
+                        </m:msub>
+                        <m:mrow>
+                          <m:mo>(</m:mo>
+                          <m:mi>p</m:mi>
+                          <m:mo>)</m:mo>
+                        </m:mrow>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation>
+        <para id="id2259053">where <m:math><m:mrow><m:msub><m:mi>H</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> is the highest power of <m:math><m:mi>p</m:mi></m:math> dividing <m:math><m:mi>d</m:mi></m:math>, and
+<m:math><m:mi mathvariant="script">P</m:mi></m:math> is the set of primes,
+then
+<m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mi>R</m:mi><m:mi>P</m:mi><m:mo>,</m:mo><m:mi>B</m:mi><m:mi>R</m:mi><m:mi>P</m:mi><m:mo>,</m:mo><m:msup><m:mi>P</m:mi><m:mi>t</m:mi></m:msup><m:msup><m:mi>R</m:mi><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup><m:mi>C</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:mi>n</m:mi></m:math> point circular convolution.
+That is</para>
+        <equation id="uid9">
+          <m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mi>C</m:mi>
+              <m:mfenced separators="" open="{" close="}">
+                <m:mi>B</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:mi>h</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2259235">computes the circular convolution of <m:math><m:mi>h</m:mi></m:math> and <m:math><m:mi>x</m:mi></m:math>.</para>
+        <para id="id2259260">As above <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>)</m:mo></m:mrow></m:math> can be taken to
+be <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>D</m:mi><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup><m:mo>)</m:mo></m:mrow></m:msub><m:mo>,</m:mo><m:msub><m:mi>E</m:mi><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup><m:mo>)</m:mo></m:mrow></m:msub><m:mo>,</m:mo><m:msub><m:mi>G</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:msub><m:mi>F</m:mi><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup><m:mo>)</m:mo></m:mrow></m:msub><m:mo>)</m:mo></m:mrow></m:math>
+where
+<m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>D</m:mi><m:mi>d</m:mi></m:msub><m:mo>,</m:mo><m:msub><m:mi>E</m:mi><m:mi>d</m:mi></m:msub><m:mo>,</m:mo><m:msub><m:mi>F</m:mi><m:mi>d</m:mi></m:msub><m:mo>)</m:mo></m:mrow></m:math> describes a bilinear form for <m:math><m:mi>d</m:mi></m:math> point <emphasis>linear</emphasis> convolution.
+This is one particular choice for <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>)</m:mo></m:mrow></m:math>
+- other bilinear forms for cyclotomic convolution that are not derived
+from linear convolution algorithms exist.</para>
+        
+        
+        <example id="element-999"><para id="element-390">
+A 45 point circular convolution algorithm:
+</para>
+<equation id="uid10">
+
+          <m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mi>C</m:mi>
+              <m:mfenced separators="" open="{" close="}">
+                <m:mi>B</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:mi>h</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+<para id="element-23469769234">
+where
+</para>
+<equation id="uid11">
+
+          <m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>P</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:msub>
+                    <m:mi>P</m:mi>
+                    <m:mrow>
+                      <m:mn>9</m:mn>
+                      <m:mo>,</m:mo>
+                      <m:mn>5</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>R</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:msub>
+                    <m:mi>R</m:mi>
+                    <m:mrow>
+                      <m:mn>9</m:mn>
+                      <m:mo>,</m:mo>
+                      <m:mn>5</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>A</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mn>9</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mn>5</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>B</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>9</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>5</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>C</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:mn>9</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:mn>5</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation><para id="element-534">and where <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> convolution.</para></example>
+        
+        
+        
+        
+<!--empty paragraphs get left behind.-->
+      </section>
+      <section id="uid12">
+        <title>The Matrix Exchange Property</title>
+        <para id="id2260126">The matrix exchange property is a useful technique
+that, under certain circumstances,
+allows one to save computation in carrying out
+the action of bilinear forms <link target-id="bid3"/>. Suppose</para>
+        <equation id="id2260137">
+          <m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:mi>C</m:mi>
+              <m:mfenced separators="" open="{" close="}">
+                <m:mi>A</m:mi>
+                <m:mi>x</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>B</m:mi>
+                <m:mi>h</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2260173">as in <link target-id="uid9"/>.
+When <m:math><m:mi>h</m:mi></m:math> is known and fixed, <m:math><m:mrow><m:mi>B</m:mi><m:mi>h</m:mi></m:mrow></m:math> can be pre-computed
+so that <m:math><m:mi>y</m:mi></m:math> can be found using only the operations
+represented by <m:math><m:mi>C</m:mi></m:math> and <m:math><m:mi>A</m:mi></m:math> and the point by point
+multiplications denoted by <m:math><m:mo>*</m:mo></m:math>.
+The operation of <m:math><m:mi>B</m:mi></m:math> is absorbed into the
+multiplicative constants.
+Note that in <link target-id="uid9"/>, the matrix
+corresponding to <m:math><m:mi>C</m:mi></m:math> is
+more complicated than is <m:math><m:mi>B</m:mi></m:math>.
+It is therefore advantageous to absorb the work
+of <m:math><m:mi>C</m:mi></m:math> instead of <m:math><m:mi>B</m:mi></m:math> into the multiplicative constants if possible.
+This can be done when <m:math><m:mi>y</m:mi></m:math> is the circular convolution
+of <m:math><m:mi>x</m:mi></m:math> and <m:math><m:mi>h</m:mi></m:math> by using the matrix exchange property.</para>
+        <para id="id2260324">To explain the matrix exchange property we draw from <link target-id="bid3"/>.
+Note that <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>C</m:mi><m:mi>d</m:mi><m:mi>i</m:mi><m:mi>a</m:mi><m:mi>g</m:mi><m:mo>(</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>)</m:mo><m:mi>B</m:mi><m:mi>h</m:mi></m:mrow></m:math>, so that
+<m:math><m:mrow><m:mi>Cdiag</m:mi><m:mo>(</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>)</m:mo><m:mi>B</m:mi></m:mrow></m:math> must be the corresponding circulant matrix,</para>
+        <equation id="id2260401"><m:math mode="display">
+            <m:mrow>
+              <m:mi>Cdiag</m:mi>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>x</m:mi>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mi>B</m:mi>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>x</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>x</m:mi>
+                        <m:mrow>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mo>⋯</m:mo>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>x</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>
+                        <m:msub>
+                          <m:mi>x</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>x</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>x</m:mi>
+                          <m:mn>2</m:mn>
+                        </m:msub>
+</m:mrow>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+<m:mrow>                        
+<m:mo>⋮</m:mo>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd/>
+                    <m:mtd/>
+<m:mtd/>
+</m:mtr>
+<m:mtr>                    
+<m:mtd>
+                      <m:msub>
+                        <m:mi>x</m:mi>
+                        <m:mrow>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>x</m:mi>
+                        <m:mrow>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>2</m:mn>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mtd>
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>x</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2260548">Since
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:mi>Cdiag</m:mi><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>)</m:mo></m:mrow><m:mi>B</m:mi><m:mo>=</m:mo><m:mi>J</m:mi><m:msup><m:mfenced separators="" open="(" close=")"><m:mi>Cdiag</m:mi><m:mo>(</m:mo><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>)</m:mo><m:mi>B</m:mi></m:mfenced><m:mi>t</m:mi></m:msup><m:mi>J</m:mi></m:mrow></m:mstyle></m:math>
+where <m:math><m:mi>J</m:mi></m:math> is the reversal matrix, one gets</para>
+        <equation id="id2260640"><m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>y</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mi>C</m:mi>
+                    <m:mfenced separators="" open="{" close="}">
+                      <m:mi>A</m:mi>
+                      <m:mi>x</m:mi>
+                      <m:mo>*</m:mo>
+                      <m:mi>B</m:mi>
+                      <m:mi>h</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd/>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mi>Cdiag</m:mi>
+                    <m:mo>(</m:mo>
+                    <m:mi>A</m:mi>
+                    <m:mi>x</m:mi>
+                    <m:mo>)</m:mo>
+                    <m:mi>B</m:mi>
+                    <m:mi>h</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd/>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mi>J</m:mi>
+                    <m:msup>
+                      <m:mfenced separators="" open="(" close=")">
+                        <m:mi>Cdiag</m:mi>
+                        <m:mo>(</m:mo>
+                        <m:mi>A</m:mi>
+                        <m:mi>x</m:mi>
+                        <m:mo>)</m:mo>
+                        <m:mi>B</m:mi>
+                      </m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:msup>
+                    <m:mi>J</m:mi>
+                    <m:mi>h</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd/>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mi>J</m:mi>
+                    <m:msup>
+                      <m:mi>B</m:mi>
+                      <m:mi>t</m:mi>
+                    </m:msup>
+                    <m:mi>d</m:mi>
+                    <m:mi>i</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>g</m:mi>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:mi>A</m:mi>
+                      <m:mi>x</m:mi>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:msup>
+                      <m:mi>C</m:mi>
+                      <m:mi>t</m:mi>
+                    </m:msup>
+                    <m:mi>J</m:mi>
+                    <m:mi>h</m:mi>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd/>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mi>J</m:mi>
+                    <m:msup>
+                      <m:mi>B</m:mi>
+                      <m:mi>t</m:mi>
+                    </m:msup>
+                    <m:mfenced separators="" open="{" close="}">
+                      <m:mi>A</m:mi>
+                      <m:mi>x</m:mi>
+                      <m:mo>*</m:mo>
+                      <m:msup>
+                        <m:mi>C</m:mi>
+                        <m:mi>t</m:mi>
+                      </m:msup>
+                      <m:mi>J</m:mi>
+                      <m:mi>h</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation>
+        <para id="id2260864">As noted in <link target-id="bid3"/>, the matrix exchange property
+can be used whenever
+<m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:mi>T</m:mi><m:mo>(</m:mo><m:mi>x</m:mi><m:mo>)</m:mo><m:mi>h</m:mi></m:mrow></m:math> where <m:math><m:mrow><m:mi>T</m:mi><m:mo>(</m:mo><m:mi>x</m:mi><m:mo>)</m:mo></m:mrow></m:math> satisfies
+<m:math><m:mrow><m:mi>T</m:mi><m:mrow><m:mo>(</m:mo><m:mi>x</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mi>J</m:mi><m:mn>1</m:mn></m:msub><m:mi>T</m:mi><m:msup><m:mrow><m:mo>(</m:mo><m:mi>x</m:mi><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup><m:msub><m:mi>J</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math> for some matrices <m:math><m:msub><m:mi>J</m:mi><m:mn>1</m:mn></m:msub></m:math> and <m:math><m:msub><m:mi>J</m:mi><m:mn>2</m:mn></m:msub></m:math>.
+In that case one gets
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:msub><m:mi>J</m:mi><m:mn>1</m:mn></m:msub><m:msup><m:mi>B</m:mi><m:mi>t</m:mi></m:msup><m:mfenced separators="" open="{" close="}"><m:mi>A</m:mi><m:mi>x</m:mi><m:mo>*</m:mo><m:msup><m:mi>C</m:mi><m:mi>t</m:mi></m:msup><m:msub><m:mi>J</m:mi><m:mn>2</m:mn></m:msub><m:mi>h</m:mi></m:mfenced></m:mrow></m:mstyle></m:math>.</para>
+        <para id="id2261059">Applying the matrix exchange property
+to <link target-id="uid9"/> one gets</para>
+<!--empty paragraphs get left behind.-->
+        <equation id="uid13">
+          <m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:mi>J</m:mi>
+              <m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>B</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:mfenced separators="" open="{" close="}">
+                <m:msup>
+                  <m:mi>C</m:mi>
+                  <m:mi>t</m:mi>
+                </m:msup>
+                <m:msup>
+                  <m:mi>R</m:mi>
+                  <m:mrow>
+                    <m:mo>-</m:mo>
+                    <m:mi>t</m:mi>
+                  </m:mrow>
+                </m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>J</m:mi>
+                <m:mi>h</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        
+        
+        <example id="element-105"><para id="element-103">
+A 45 point circular convolution algorithm:
+</para>
+<equation id="id2261184">
+
+          <m:math mode="display">
+            <m:mrow>
+              <m:mi>y</m:mi>
+              <m:mo>=</m:mo>
+              <m:mi>J</m:mi>
+              <m:msup>
+                <m:mi>P</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:msup>
+                <m:mi>B</m:mi>
+                <m:mi>t</m:mi>
+              </m:msup>
+              <m:mfenced separators="" open="{" close="}">
+                <m:mi>u</m:mi>
+                <m:mo>*</m:mo>
+                <m:mi>A</m:mi>
+                <m:mi>R</m:mi>
+                <m:mi>P</m:mi>
+                <m:mi>x</m:mi>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation><para id="element-23">where <m:math><m:mrow><m:mi>u</m:mi><m:mo>=</m:mo><m:msup><m:mi>C</m:mi><m:mi>t</m:mi></m:msup><m:msup><m:mi>R</m:mi><m:mrow><m:mo>-</m:mo><m:mi>t</m:mi></m:mrow></m:msup><m:mi>P</m:mi><m:mi>J</m:mi><m:mi>h</m:mi></m:mrow></m:math> and</para>
+<equation id="id2261287">
+
+          <m:math mode="display">
+            <m:mtable displaystyle="true">
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>P</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:msub>
+                    <m:mi>P</m:mi>
+                    <m:mrow>
+                      <m:mn>9</m:mn>
+                      <m:mo>,</m:mo>
+                      <m:mn>5</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>R</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:msub>
+                    <m:mi>R</m:mi>
+                    <m:mrow>
+                      <m:mn>9</m:mn>
+                      <m:mo>,</m:mo>
+                      <m:mn>5</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>A</m:mi>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mn>9</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:msub>
+                      <m:mi>A</m:mi>
+                      <m:mn>5</m:mn>
+                    </m:msub>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>A</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msup>
+                    <m:mi>B</m:mi>
+                    <m:mi>t</m:mi>
+                  </m:msup>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msubsup>
+                      <m:mi>B</m:mi>
+                      <m:mn>3</m:mn>
+                      <m:mi>t</m:mi>
+                    </m:msubsup>
+                    <m:mo>⊕</m:mo>
+                    <m:msubsup>
+                      <m:mi>B</m:mi>
+                      <m:mn>9</m:mn>
+                      <m:mi>t</m:mi>
+                    </m:msubsup>
+                    <m:mo>⊕</m:mo>
+                    <m:msubsup>
+                      <m:mi>B</m:mi>
+                      <m:mn>5</m:mn>
+                      <m:mi>t</m:mi>
+                    </m:msubsup>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msubsup>
+                        <m:mi>B</m:mi>
+                        <m:mn>3</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>⊗</m:mo>
+                      <m:msubsup>
+                        <m:mi>B</m:mi>
+                        <m:mn>5</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msubsup>
+                        <m:mi>B</m:mi>
+                        <m:mn>9</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>⊗</m:mo>
+                      <m:msubsup>
+                        <m:mi>B</m:mi>
+                        <m:mn>5</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msup>
+                    <m:mi>C</m:mi>
+                    <m:mi>t</m:mi>
+                  </m:msup>
+                </m:mtd>
+                <m:mtd>
+                  <m:mo>=</m:mo>
+                </m:mtd>
+                <m:mtd columnalign="left">
+                  <m:mrow>
+                    <m:mn>1</m:mn>
+                    <m:mo>⊕</m:mo>
+                    <m:msubsup>
+                      <m:mi>C</m:mi>
+                      <m:mn>3</m:mn>
+                      <m:mi>t</m:mi>
+                    </m:msubsup>
+                    <m:mo>⊕</m:mo>
+                    <m:msubsup>
+                      <m:mi>C</m:mi>
+                      <m:mn>9</m:mn>
+                      <m:mi>t</m:mi>
+                    </m:msubsup>
+                    <m:mo>⊕</m:mo>
+                    <m:msubsup>
+                      <m:mi>C</m:mi>
+                      <m:mn>5</m:mn>
+                      <m:mi>t</m:mi>
+                    </m:msubsup>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msubsup>
+                        <m:mi>C</m:mi>
+                        <m:mn>3</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>⊗</m:mo>
+                      <m:msubsup>
+                        <m:mi>C</m:mi>
+                        <m:mn>5</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                    <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mo>(</m:mo>
+                      <m:msubsup>
+                        <m:mi>C</m:mi>
+                        <m:mn>9</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>⊗</m:mo>
+                      <m:msubsup>
+                        <m:mi>C</m:mi>
+                        <m:mn>5</m:mn>
+                        <m:mi>t</m:mi>
+                      </m:msubsup>
+                      <m:mo>)</m:mo>
+                    </m:mrow>
+                  </m:mrow>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:math>
+        </equation>
+<para id="element-2345666">and where <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>A</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>B</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>,</m:mo><m:msub><m:mi>C</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mo>)</m:mo></m:mrow></m:math>
+describes a bilinear form for <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:mi>i</m:mi></m:msubsup></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> convolution.</para></example>
+        
+        
+        
+        
+<!--empty paragraphs get left behind.-->
+      </section>
+    </section>
+  </content>
+  <bib:file>
+    <bib:entry id="bid0">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Blahut, R. E.</bib:author>
+        <bib:title>Fast Algorithms for Digital Signal Processing</bib:title>
+        <bib:publisher>Addison-Wesley</bib:publisher>
+        <bib:year>1985</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid3">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Johnson, H. W. and Burrus, C. S.</bib:author>
+        <bib:title>On the Structure of Efficient DFT Algorithms</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1985</bib:year>
+<!--optional fields-->
+        <bib:volume>33</bib:volume>
+        <bib:number>1</bib:number>
+        <bib:pages>248-254</bib:pages>
+        <bib:month>February</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid1">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Myers, D. G.</bib:author>
+        <bib:title>Digital Signal Processing: Efficient Convolution and Fourier Transform Techniques</bib:title>
+        <bib:publisher>Prentice Hall</bib:publisher>
+        <bib:year>1990</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid2">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Nussbaumer, H. J.</bib:author>
+        <bib:title>Fast Fourier Transform and Convolution Algorithms</bib:title>
+        <bib:publisher>Sringer-Verlag</bib:publisher>
+        <bib:year>1982</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+  </bib:file>
+</document>

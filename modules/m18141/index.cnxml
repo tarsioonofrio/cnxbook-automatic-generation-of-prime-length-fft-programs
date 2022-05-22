@@ -1,0 +1,154 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Appendix: Matlab Functions For Circular Convolution and Prime Length FFTs</title>
+  <metadata>
+  <md:content-id>m18141</md:content-id><md:title>Appendix: Matlab Functions For Circular Convolution and Prime Length FFTs</md:title>
+  <md:abstract/>
+  <md:uuid>21795b84-e5f9-4601-9d0f-99e8887165dd</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Programs for Reduction Operations</title>
+      <para id="id2253722">The reduction matrix of <link document="m18132" target-id="uid20">Equation 44 in Preliminaries</link> is implemented
+by <code>KRED</code>
+ which calls <code>RED</code>
+.
+Its transpose and inverse transpose are implemented by
+<code>tRED</code>
+, <code>tRED</code>
+, <code>itKRED</code>
+ and <code>itRED</code>
+.</para><code id="id5546597" display="block">function x = KRED(P,E,K,x)
+% x = KRED(P,E,K,x);
+% P : P = [P(1),...,P(K)];
+% E : E = [E(K),...,E(K)];
+for i = 1:K
+   a = prod(P(1:i-1).^E(1:i-1));
+   c = prod(P(i+1:K).^E(i+1:K));
+   p = P(i);
+   e = E(i);
+   for j = e-1:-1:0
+      x(1:a*c*(p^(j+1))) = RED(p,a,c*(p^j),x(1:a*c*(p^(j+1))));
+   end
+end
+</code><code id="id5856202" display="block">function y = RED(p,a,c,x)
+% y = RED(p,a,c,x);
+y = zeros(a*c*p,1);
+for i = 0:c:(a-1)*c
+   for j = 0:c-1
+      y(i+j+1) = x(i*p+j+1);
+      for k = 0:c:c*(p-2)
+         y(i+j+1) = y(i+j+1) + x(i*p+j+k+c+1);
+         y(i*(p-1)+j+k+a*c+1) = x(i*p+j+k+1) - x(i*p+j+c*(p-1)+1);
+      end
+   end
+end
+</code><code id="id9419220" display="block">function x = tKRED(P,E,K,x)
+% x = tKRED(P,E,K,x);
+% (transpose)
+% P : P = [P(1),...,P(K)];
+% E : E = [E(K),...,E(K)];
+for i = K:-1:1
+   a = prod(P(1:i-1).^E(1:i-1));
+   c = prod(P(i+1:K).^E(i+1:K));
+   p = P(i);
+   e = E(i);
+   for j = 0:e-1
+      x(1:a*c*(p^(j+1))) = tRED(p,a,c*(p^j),x(1:a*c*(p^(j+1))));
+   end
+end
+</code><code id="id3828468" display="block">function y = tRED(p,a,c,x)
+% y = tRED(p,a,c,x);
+% (transpose)
+y = zeros(a*c*p,1);
+for i = 0:c:(a-1)*c
+   for j = 0:c-1
+      y(i*p+j+c*(p-1)+1) = x(i+j+1);
+      for k = 0:c:c*(p-2)
+         y(i*p+j+k+1) = x(i+j+1) + x(i*(p-1)+j+k+a*c+1);
+         y(i*p+j+c*(p-1)+1) = y(i*p+j+c*(p-1)+1) - x(i*(p-1)+j+k+a*c+1);
+      end
+   end
+end
+</code>
+    </section>
+    <section id="cid2">
+      <title>Programs for I ⊗ Dk ⊗ I</title>
+      <para id="id2253796">The operations of <m:math><m:mrow><m:msub><m:mi>I</m:mi><m:mi>m</m:mi></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>D</m:mi><m:mn>2</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:mi>n</m:mi></m:msub></m:mrow></m:math> and
+<m:math><m:mrow><m:msub><m:mi>I</m:mi><m:mi>m</m:mi></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>D</m:mi><m:mn>3</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:mi>n</m:mi></m:msub></m:mrow></m:math> are carried out by
+<code>ID2I</code>
+ and <code>ID3I</code>
+.
+Their transposes by <code>ID2tI</code>
+ and <code>ID3tI</code>
+.
+The functions <code>D2</code>
+ and <code>D3</code>
+
+are listed in the appendix,
+`Bilinear Forms for Linear Convolution.'
+Two versions of <code>ID2I</code>
+ are listed here.
+One of them calls <code>D2</code>
+ in a loop,
+while the other version puts the <code>D2</code>
+
+code in the loop instead of using a function call.
+There are several ways to implement the
+form <m:math><m:mrow><m:mi>I</m:mi><m:mo>⊗</m:mo><m:msub><m:mi>D</m:mi><m:mn>2</m:mn></m:msub><m:mo>⊗</m:mo><m:mi>I</m:mi></m:mrow></m:math>. But this is a simple
+and straightforward method.
+It is modeled after <code>IAI</code>
+ in the text.</para><code id="id13682867" display="block">function y = ID2I(m,n,x)
+y = zeros(m*n*3,1);
+v = 0:n:2*n;
+u = 0:n:n;
+for i = 0:m-1
+   for j = 0:n-1
+      y(v+i*3*n+j+1) = D2(x(u+i*2*n+j+1));
+   end
+end
+</code><code id="id3970225" display="block">function y = ID2I(m,n,x)
+y = zeros(m*n*3,1);
+for i = 0:n:n*(m-1)
+   i2 = 2*i;
+   i3 = 3*i;
+   for j = 1:n
+      j2 = i2 + j;
+      j3 = i3 + j;
+      y(j3) = x(j2);
+      y(n+j3) = x(n+j2);
+      y(2*n+j3) = x(j2) + x(n+j2);
+   end
+end
+</code><code id="id9257624" display="block">function y = ID2tI(m,n,x)
+y = zeros(m*n*2,1);
+v = 0:n:n;
+u = 0:n:2*n;
+for i = 0:m-1
+   for j = 0:n-1
+      y(v+i*2*n+j+1) = D2t(x(u+i*3*n+j+1));
+   end
+end
+</code><code id="id14335799" display="block">function y = ID3I(m,n,x)
+y = zeros(m*n*5,1);
+v = 0:n:4*n;
+u = 0:n:2*n;
+for i = 0:m-1
+   for j = 0:n-1
+      y(v+i*5*n+j+1) = D3(x(u+i*3*n+j+1));
+   end
+end
+</code><code id="id10023542" display="block">function y = ID3tI(m,n,x)
+y = zeros(m*n*3,1);
+v = 0:n:2*n;
+u = 0:n:4*n;
+for i = 0:m-1
+   for j = 0:n-1
+      y(v+i*3*n+j+1) = D3t(x(u+i*5*n+j+1));
+   end
+end
+</code>
+    </section>
+  </content>
+  <bib:file/>
+</document>

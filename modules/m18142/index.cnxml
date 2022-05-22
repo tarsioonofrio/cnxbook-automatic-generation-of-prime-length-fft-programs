@@ -1,0 +1,631 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Appendix: A Matlab Program for Generating Prime Length FFT Programs</title>
+  <metadata>
+  <md:content-id>m18142</md:content-id><md:title>Appendix: A Matlab Program for Generating Prime Length FFT Programs</md:title>
+  <md:abstract/>
+  <md:uuid>7c5d9118-b708-4583-bd22-4e316c3a2666</md:uuid>
+</metadata>
+
+<content>
+<code id="id12727230" display="block">
+ function [u,ip,op,ADDS,MULTS] = ff(p,e);
+% [u,ip,op,ADDS,MULTS] = ff(p,e);
+% u  : multiplicative constants
+% ip : input permutation
+% op : output permutation
+
+K = length(p);
+N = prod(p.^e);
+P = N + 1;
+[pr, ipr] = primitive_root(P);
+Red_Adds = 2 * N * (K - sum(1./(p.^e)) );
+ADDS = 2 * Red_Adds;
+
+FS = sprintf('fft%d.m',P);
+fid = fopen(FS,'w');
+
+fprintf(fid,'function y = fft%d(x,u,ip,op)\n',P);
+fprintf(fid,'%% y = fft%d(x,u,ip,op)\n',P);
+fprintf(fid,'%% y  : the %d point DFT of x \n',P);
+fprintf(fid,'%% u  : a vector of precomputed multiplicative constants\n');
+fprintf(fid,'%% ip : input permutation\n');
+fprintf(fid,'%% op : ouput permutation\n');
+
+Pstr = sprintf('[%d',p(1));
+for k = 2:K, Pstr = [Pstr, sprintf(',%d',p(k))]; end
+Pstr = [Pstr,']'];
+Estr = sprintf('[%d',e(1));
+for k = 2:K, Estr = [Estr, sprintf(',%d',e(k))]; end
+Estr = [Estr,']'];
+PEstr = sprintf('[%d',p(1)^e(1));
+for k = 2:K, PEstr = [PEstr, sprintf(',%d',p(k)^e(k))]; end
+PEstr = [PEstr,']'];
+
+fprintf(fid,'\n');
+S = sprintf('y = zeros(%d,1);\n',P);
+fprintf(fid,S);
+S1 = sprintf('x = x(ip);');
+S2 = sprintf('%% input permutation\n');
+fprintf(fid,'%-50s%s',S1,S2);
+S1 = sprintf(['x(2:%d) = KRED(',Pstr,',',Estr,',%d,x(2:%d));'],P,K,P);
+S2 = sprintf('%% reduction operations\n');
+fprintf(fid,'%-50s%s',S1,S2);
+
+e_table = [0:e(1)]';
+a = e(1)+1;
+for i = 2:K
+   e_table = [kron(ones(e(i)+1,1),e_table), kron([0:e(i)]',ones(a,1))];
+   a = a * (e(i)+1);
+end
+R = prod(e+1);
+
+
+% ------------------------ MULTIPLICATIVE CONSTANTS ------------------------
+k = rp(P,ipr,0:N);
+I = sqrt(-1);
+W = exp(-I*2*pi*k/P);
+h = W(2:P);
+h = h(N:-1:1);
+h = pfp(p.^e,K,h);
+h = itKRED(p,e,K,h);
+u = h(1);
+
+S1 = sprintf('y(1) = x(1)+x(2);');
+S2 = sprintf('%% DC term calculation\n');
+fprintf(fid,'%-50s%s',S1,S2);
+
+DC_ADDS = 2;
+ADDS = ADDS + DC_ADDS;
+
+SLINE = '--------------------------------------------------------------------------------';
+SB = ' block : 1 ';
+SC = SLINE;
+BL = 21;
+SC(BL:BL-1+length(SB)) = SB;
+fprintf(fid,'%% %s\n',SC);
+S1 = sprintf('y(2) = x(2)*u(1);');
+fprintf(fid,'%-40s\n',S1);
+a = 1;
+MULTS = 1;
+for i = 2:R
+   v = e_table(i,:);
+   f = find(v&gt;0);
+   q = p(f);
+   t = v(f);
+   L = prod(q-1)*prod(q.^(t-1));
+
+   B = prod(q.^t);
+   bs = sprintf('%d',q(1)^t(1));
+   for k = 2:length(q), bs = [bs, sprintf(' * %d',q(k)^t(k))]; end
+   if length(q) &gt; 1
+	SB = sprintf(' block : %d = %s ',B,bs);
+	SC = SLINE;
+	SC(BL:BL-1+length(SB)) = SB;
+	fprintf(fid,'%% %s\n',SC);
+   else
+	SB = sprintf(' block : %d ',B);
+        SC = SLINE;
+        SC(BL:BL-1+length(SB)) = SB;
+        fprintf(fid,'%% %s\n',SC);
+   end
+   if prod(q.^t) == 2
+      S1 = sprintf('y(%d) = x(%d)*u(%d);',a+2,a+2,MULTS+1);
+      fprintf(fid,'%-40s\n',S1);
+      Mk = 1;
+   else
+      d = []; r = []; c = []; Q = []; Qt = [];
+      for j = 1:length(q)
+         [dk,rk,ck,Qk,Qtk] = A_data(q(j)^t(j));
+         if dk &gt; 1
+            d = [d dk]; r = [r rk]; c = [c ck]; Q = [Q Qk]; Qt = [Qt Qtk];
+         end
+      end
+      [g,C1] = cgc(Q,r,c,length(Q));
+      ADDS = ADDS + C1;
+      Mk = prod(r);
+      BEG = int2str(a+2); FIN = int2str(a+1+L);
+      XX = ['x(',BEG,':',FIN,')']; YY = 'v';
+      kpi(d,g,r,c,length(Q),YY,XX,fid);
+      S1 = ['v = v.*u(',int2str(MULTS+1),':',int2str(MULTS+Mk),');'];
+      fprintf(fid,'%-40s\n',S1);
+      [g,C2] = cgc(Qt,c,r,length(Q));
+      ADDS = ADDS + C2;
+      XX = 'v'; YY = ['y(',BEG,':',FIN,')'];
+      kpit(d,g,c,r,length(Q),YY,XX,fid);
+   end
+
+   c = [];
+   r = [];
+   lq = length(q);
+   for j = 1:lq
+      [fk,rk,ck] = C_data(q(j),t(j));
+      r = [r rk]; c = [c ck];
+   end
+   f = (q-1).*(q.^(t-1));
+   temp = Kcrot(q,t,lq,h(a+1:a+L));
+   temp = KFt(f,r,c,temp);
+   u = [u; temp(:)];
+   a = a + L;
+   MULTS = MULTS + Mk;
+end
+
+u(1) = u(1)-1;
+fprintf(fid,'%% %s\n',SLINE);
+S1 = sprintf('y(2) = y(1)+y(2);');
+S2 = sprintf('%% DC term calculation\n');
+fprintf(fid,'%-50s%s',S1,S2);
+S1 = sprintf(['y(2:%d) = tKRED(',Pstr,',',Estr,',%d,y(2:%d));'],P,K,P);
+S2 = sprintf('%% transpose reduction operations\n');
+fprintf(fid,'%-50s%s',S1,S2);
+S1 = sprintf('y = y(op);');
+S2 = sprintf('%% output permutation\n');
+fprintf(fid,'%-50s%s',S1,S2);
+fprintf(fid,'\n');
+
+MULTS = 2 * MULTS;
+ADDS = 2* ADDS;
+fprintf(fid,'%% For complex data - \n');
+fprintf(fid,'%% Total Number of Real Multiplications : %d\n',MULTS);
+fprintf(fid,'%% Total Number of Real Additions: %d\n\n',ADDS);
+fclose(fid);
+
+%%%%%%%%%%%%%%%%%%%% COMPUTE INPUT AND OUTPUT PERMUTATIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+id = 1:P;   % identity permutation
+ip = rp(P,pr,id);
+ip(2:P) = pfp(p.^e,K,ip(2:P));
+
+op = id;
+op(2:P) = pfpt(p.^e,K,op(2:P));
+op(2:P) = op(P:-1:2);
+op = rpt(P,ipr,op);
+
+%%%%%%%%%%%%%%%%% PUT MULTIPLICATIVE CONSTANTS AND PERMUTATIONS IN A FILE %%%%%%%%%%%%%%
+
+CFS = sprintf('cap%d.m',P);
+fid = fopen(CFS,'w');
+fprintf(fid,'\n%% The multiplicative constants for the %d point FFT\n\n',P);
+fprintf(fid,'I = sqrt(-1);\n');
+fprintf(fid,'u = [\n');
+for k = 1:MULTS/2
+   if abs(real(u(k))) &lt; 0.000001
+      fprintf(fid,'%25.15f*I\n',imag(u(k)));
+   elseif abs(imag(u(k))) &lt; 0.00001
+      fprintf(fid,'%25.15f\n',real(u(k)));
+   else
+      fprintf(fid,'%25.15f + %25.15f*I\n',real(u(k)),imag(u(k)));
+   end
+end
+fprintf(fid,'];\n\n');
+fprintf(fid,'\n%% The input permutation for the %d point FFT\n\n',P);
+fprintf(fid,'ip = [\n');
+for k = 1:P
+	fprintf(fid,'   %d\n',ip(k));
+end
+fprintf(fid,'];\n\n');
+fprintf(fid,'\n%% The output permutation for the %d point FFT\n\n',P);
+fprintf(fid,'op = [\n');
+for k = 1:P
+        fprintf(fid,'   %d\n',op(k));
+end
+fprintf(fid,'];\n\n');
+fclose(fid);
+</code>
+    <para id="id2253714">The following programs print the program statements that carry out the operation
+<m:math><m:mrow><m:mi>I</m:mi><m:mo>⊗</m:mo><m:msub><m:mi>D</m:mi><m:mi>k</m:mi></m:msub><m:mo>⊗</m:mo><m:mi>I</m:mi></m:mrow></m:math> and <m:math><m:mrow><m:mi>I</m:mi><m:mo>⊗</m:mo><m:msubsup><m:mi>D</m:mi><m:mi>k</m:mi><m:mi>t</m:mi></m:msubsup><m:mo>⊗</m:mo><m:mi>I</m:mi></m:mrow></m:math>.
+They are modeled after 
+<code>kpi</code>
+
+ in the text.
+</para>
+    <code id="id22477247" display="block">function kpi(d,g,r,c,n,Y,X,fid)
+% kpi(d,g,r,c,n,Y,X,fid);
+% Kronecker Product : A(d(1)) kron ... kron A(d(n))
+% g : permutation of 1,...,n 
+% r : [r(1),...,r(n)]
+% c : [c(1),..,c(n)]
+% r(i) : rows of A(d(i))
+% c(i) : columns of A(d(i))
+% n : number of terms
+for i = 1:n
+   a = 1;
+   for k = 1:(g(i)-1)
+      if i &gt; find(g==k) 
+         a = a * r(k);
+      else
+         a = a * c(k);
+      end
+   end
+   b = 1;
+   for k = (g(i)+1):n
+      if i &gt; find(g==k)
+         b = b * r(k);
+      else
+         b = b * c(k);
+      end
+   end
+   % Y = (I(a) kron A(d(g(i))) kron I(b)) * X;
+   if i == 1
+      S1 = sprintf([Y,' = ID%dI(%d,%d,',X,');    '],d(g(i)),a,b);
+      S2 = sprintf(['%% ',Y,' = (I(%d) kron D%d kron I(%d)) * ',X],a,d(g(i)),b);
+      fprintf(fid,'%-35s%s\n',S1,S2);
+   elseif d(g(i)) ~= 1
+      S1 = sprintf([Y,' = ID%dI(%d,%d,',Y,');    '],d(g(i)),a,b);
+      S2 = sprintf(['%% ',Y,' = (I(%d) kron D%d kron I(%d)) * ',Y],a,d(g(i)),b);
+      fprintf(fid,'%-35s%s\n',S1,S2);
+   end
+end
+</code><code id="id22477254" display="block">function kpit(d,g,r,c,n,Y,X,fid)
+% kpit(g,r,c,n,Y,X,fid);
+% (transpose)
+% Kronecker Product : A(d(1))' kron ... kron A(d(n))'
+% g : permutation of 1,...,n 
+% r : [r(1),...,r(n)]
+% c : [c(1),..,c(n)]
+% r(i) : rows of A(d(i))'
+% c(i) : columns of A(d(i))'
+% n : number of terms
+
+for i = 1:n
+   a = 1;
+   for k = 1:(g(i)-1)
+      if i &gt; find(g==k)
+         a = a * r(k);
+      else
+         a = a * c(k);
+      end
+   end
+   b = 1;
+   for k = (g(i)+1):n
+      if i &gt; find(g==k)
+         b = b * r(k);
+      else
+         b = b * c(k);
+      end
+   end
+   % x = (I(a) kron A(d(g(i)))'' kron I(b)) * x;
+   if i == n
+      S1 = sprintf([Y,' = ID%dtI(%d,%d,',X,');    '],d(g(i)),a,b);
+      S2 = sprintf(['%% ',Y,' = (I(%d) kron D%d'' kron I(%d)) * ',X],a,d(g(i)),b);
+      fprintf(fid,'%-35s%s\n',S1,S2);
+   elseif d(g(i)) ~= 1
+      S1 = sprintf([X,' = ID%dtI(%d,%d,',X,');    '],d(g(i)),a,b);
+      S2 = sprintf(['%% ',X,' = (I(%d) kron D%d'' kron I(%d)) * ',X],a,d(g(i)),b);
+      fprintf(fid,'%-35s%s\n',S1,S2);
+   end
+end
+</code><section id="cid1">
+      <title>Programs for Computing Multiplicative Constants</title>
+      <para id="id2253797">The following programs carry out the operation of <m:math><m:mrow><m:msub><m:mi>F</m:mi><m:msub><m:mi>d</m:mi><m:mn>1</m:mn></m:msub></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>F</m:mi><m:msub><m:mi>d</m:mi><m:mi>K</m:mi></m:msub></m:msub></m:mrow></m:math>
+where <m:math><m:mi>F</m:mi></m:math> is the reconstruction matrix in a linear convolution algorithm.
+See the appendix, `Bilinear Forms for Linear Convolution.'
+</para>
+      <code id="id21712496" display="block">function u = KFt(f,r,c,u)
+% u = (F^t kron ... kron F^t)*u
+% (transpose)
+% f = [f(1),...,f(K)]
+% r : r(i) = rows of F(i)
+% c : c(i) = columns of F(i)
+% u : length(u) = prod(c);
+K = length(f);
+for i = 1:K
+   m = prod(c(1:i-1));
+   n = prod(r(i+1:K));
+   u = IFtI(f(i),r(i),c(i),m,n,u);
+end
+</code><code id="id21777508" display="block">function y = IFtI(s,r,c,m,n,x);
+% y = (I(m) kron F(s)^t kron I(n))*x
+% (transpose)
+% r : rows of F(s)
+% c : columns of F(s)
+v = 0:n:n*(c-1);
+u = 0:n:n*(r-1);
+for i = 0:m-1
+   for j = 0:n-1
+      y(v+i*c*n+j+1) = Ftop(s,x(u+i*r*n+j+1));
+   end
+end
+</code><code id="id19155662" display="block">function y = Ftop(k,x)
+if k == 1, y = x;
+elseif k == 2, y = F2t(x);
+elseif k == 3, y = F3t(x);
+elseif k == 4, y = F4t(x);
+elseif k == 6, y = F6t(x);
+elseif k == 8, y = F8t(x);
+elseif k == 18, y = F18t(x);
+end
+</code><para id="id2253860">The following programs carry out the operation of <m:math><m:mrow><m:msub><m:mi>G</m:mi><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>G</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>K</m:mi><m:msub><m:mi>e</m:mi><m:mi>K</m:mi></m:msub></m:msubsup></m:msub></m:mrow></m:math>
+were <m:math><m:mi>G</m:mi></m:math> is given by <link document="m18133" target-id="uid6">Equation 13</link> and <link document="m18133" target-id="uid7">Equation 14 from Bilinear Forms for Circular Convolution</link>.
+</para>
+      <code id="id8046878" display="block">function x = Kcrot(p,e,K,x)
+% Kronecker product of Cyclotomic Reduction Operations.
+% x = (G(p(1)^e(1)) kron ... kron G(p(K)^(K)))^t*x
+% (transpose)
+% p : p = [p(1),...,p(K)];
+% e : e = [e(1),...,e(K)];
+a = (p-1).*((p).^(e-1));
+r = a;		% r(i) = number of rows of G(i)
+c = 2*a-1;	% c(i) = number of columns of G(i)
+m = 1;
+n = prod(r);
+for i = 1:K
+   n = n / r(i);
+   x = IcrotI(p(i),e(i),m,n,x);
+   m = m * c(i);
+end
+</code><code id="id16719319" display="block">function y = IcrotI(p,e,m,n,x)
+%  y = (eye(m) kron G(p^e)^t kron eye(n))*x
+%  (transpose)
+a = (p-1)*(p^(e-1));
+c = a;
+r = 2*a-1;
+y = zeros(r*m*n,1);
+v = 0:n:(r-1)*n;
+u = 0:n:(c-1)*n;
+for i = 0:m-1
+   for j = 0:n-1
+      y(v+i*r*n+j+1) = crot(p,e,x(u+i*c*n+j+1));
+   end
+end
+</code><code id="id11217650" display="block">function y = crot(p,e,x)
+% y = crot(p,x)
+% cyclotomic reduction matrix (transpose)
+% length(x) == 2*n-1
+% length(y) == n
+% where n = (p-1)*(p^(e-1))
+n = (p-1)*(p^(e-1));
+y = zeros(2*n-1,1); 
+if p == 2
+  n = p^(e-1);
+  y(1:n) = x;
+  y(n+1:2*n-1) = -x(1:n-1);
+else
+  y(1:n) = x;
+  L = p^(e-1);
+  y(n+1:n+L) = -x(1:L);
+  a = L;
+  for k = 2:p-1
+     y(n+1:n+L) = y(n+1:n+L) - x(a+1:a+L);
+     a = a + L;
+  end
+  b = 2*n-1 - p*(p^(e-1));
+  y(p*L+1:p*L+b) = x(1:b);
+end
+</code><para id="id2253942">The following programs tell the programs for code generation relevant information
+about the bilinear forms for cyclotomic convolution.
+Specifically, they indicates the linear convolution out of which
+these cyclotomic convolution are composed, and the
+dimensions of the corresponding matrices.
+See the <link document="m18139">appendix Bilinear Forms for Linear Convolution</link>.
+</para>
+      <code id="id12192717" display="block">function [d,r,c,Q,Qt] = A_data(n)
+% A : A matrix in bilinear form for cyclotomic convolution
+% d : linear convolution modules used
+% r : rows
+% c : columns
+% Q : Q(i) = cost associated with D(d(i))
+% Qt : Qt(i) = cost associated with D(d(i))'
+if n == 2, d = [1];
+elseif n == 4, d = [2];
+elseif n == 8, d = [2 2];
+elseif n == 16, d = [2 2 2];
+elseif n == 3, d = [2];
+elseif n == 9, d = [2 3];
+elseif n == 27, d = [2 3 3];
+elseif n == 5, d = [2 2];
+elseif n == 7, d = [2 3];
+end
+r = []; c = []; Q = []; Qt = [];
+for k = 1:length(d)
+   [rk, ck, Qk, Qtk] = D_data(d(k));
+   r = [r rk]; c = [c ck]; Q = [Q Qk]; Qt = [Qt Qtk];
+end
+</code><code id="id20293201" display="block">function [r,c,Q,Qt] = D_data(d);
+% D : D matrix in bilinear form for linear convolution
+% r : rows
+% c : columns
+% Q : cost associated with D(d)
+% Qt : cost associated with D(d)'
+if d == 1, r = 1; c = 1; Q = 0; Qt = 0;
+elseif d == 2, r = 3; c = 2; Q = 1; Qt = 2;
+elseif d == 3, r = 5; c = 3; Q = 7; Qt = 9;
+end
+</code><code id="id12015966" display="block">function [f,r,c] = C_data(p,e)
+% f : length of linear convolution
+% r : rows
+% c : columns
+f = prod((p-1).*(p.^(e-1)));
+% (Euler Totient Function)
+r = 2*f-1;
+c = F_data(f);
+</code><code id="id10873434" display="block">function c = F_data(n)
+% c : columns of F matrix
+if n == 1, c = 1;
+elseif n == 2, c = 3;
+elseif n == 4, c = 9;
+elseif n == 8, c = 27;
+elseif n == 3, c = 5;
+elseif n == 6, c = 15;
+elseif n == 18, c = 75;
+end
+</code><section id="uid1">
+        <title>Programs for Inverse Transpose Reduction Operations</title>
+        <code id="id18267829" display="block">function x = itKRED(P,E,K,x)
+% x = itKRED(P,E,K,x);
+% (inverse transpose)
+% P : P = [P(1),...,P(K)];
+% E : E = [E(K),...,E(K)];
+for i = 1:K
+   a = prod(P(1:i-1).^E(1:i-1));
+   c = prod(P(i+1:K).^E(i+1:K));
+   p = P(i);
+   e = E(i);
+   for j = e-1:-1:0
+      x(1:a*c*(p^(j+1))) = itRED(p,a,c*(p^j),x(1:a*c*(p^(j+1))));
+   end
+end
+</code><code id="id21326954" display="block">function y = itRED(p,a,c,x)
+% y = itRED(p,a,c,x);
+% (inverse transpose)
+y = zeros(a*c*p,1);
+for i = 0:c:(a-1)*c
+   for j = 0:c-1
+      A = x(i*p+j+1);
+      for k = 0:c:c*(p-2)
+         A = A + x(i*p+j+k+c+1);
+      end
+      y(i+j+1) = A;
+      for k = 0:c:c*(p-2)
+         y(i*(p-1)+j+k+a*c+1) = p*x(i*p+j+k+1) - A;
+      end
+   end
+end
+y = y/p;
+</code>
+      </section>
+    </section>
+    <section id="cid2">
+      <title>Programs for Permutations</title>
+      <para id="id2253972">The permutation of <link document="m18132" target-id="uid9">Equation 18 from Preliminaries</link> is implemented by
+
+<code>pfp</code>
+
+. It calls the function 
+<code>pfp2I</code>
+
+.
+The transpose is implemented by 
+<code>pfpt</code>
+
+ and it
+calls 
+<code>pfpt2I</code>
+
+.
+</para>
+      <code id="id21711459" display="block">function x = pfp(n,K,x)
+% x = P(n(1),...,n(K)) * x
+% n = [n(1),...,n(K)];
+% length(x) = prod(n(1),...,n(K))
+a = prod(n);
+s = 1;
+for i = K:-1:2
+  a = a / n(i);
+  x = pfp2I(a,n(i),s,x);
+  s = s * n(i);
+end
+</code><code id="id21326279" display="block">function y = pfp2I(a,b,s,x)
+% y = kron(P(a,b),I(s)) * x;
+% length(x) = a*b*s
+n = a * b;
+y = zeros(n*s,1);
+k1 = 0;
+k2 = 0;
+for k = 0:n-1
+  i1 = s * (k1 + b * k2);
+  i2 = s * k;
+  for i = 1:s
+    y(i1 + i) = x(i2 + i);
+  end
+  k1 = k1 + 1;
+  k2 = k2 + 1;
+  if k1 &gt;= b
+    k1 = k1 - b;
+  end
+  if k2 &gt;= a
+    k2 = k2 - a;
+  end
+end
+</code><code id="id22492540" display="block">function x = pfpt(n,K,x)
+% x = P(n(1),...,n(K))' * x
+% (tanspose)
+% n = [n(1),...,n(K)];
+% length(x) = prod(n(1),...,n(K))
+% a = prod(n);
+a = n(1);
+s = prod(n(2:K));
+for i = 2:K
+  s = s / n(i);
+  x = pfpt2I(a,n(i),s,x);
+  a = a * n(i);
+end
+</code><code id="id22492552" display="block">function y = pfpt2I(a,b,s,x)
+% y = P(a,b)' kron I(s) * x;
+% (transpose)
+% length(x) = a*b*s
+n = a * b;
+y = zeros(n*s,1);
+k1 = 0;
+k2 = 0;
+for k = 0:n-1
+  i1 = s * (k1 + b * k2);
+  i2 = s * k;
+  for i = 1:s
+    y(i2 + i) = x(i1 + i);
+  end
+  k1 = k1 + 1;
+  k2 = k2 + 1;
+  if k1 &gt;= b
+    k1 = k1 - b;
+  end
+  if k2 &gt;= a
+    k2 = k2 - a;
+  end
+end
+</code><para id="id2254030">The following Matlab programs implement Rader's permutation
+and its transpose.
+They require the primitive root to be passed to them as
+an argument.
+</para><code id="id11178847" display="block">function y = rp(p,r,x)
+% Rader's Permutation
+% p : prime
+% r : a primitive root of p
+% x : length(x) == p
+a = 1;
+y = zeros(p,1);
+y(1) = x(1);
+for k = 2:p
+   y(k) = x(a+1);
+   a = rem(a*r,p);
+end
+</code><code id="id14711869" display="block">function y = rpt(p,r,x)
+% Rader's Permutation
+% (transpose)
+% p : prime
+% r : a primitive root of p
+% x : length(x) == p
+a = 1;
+y = zeros(p,1);
+y(1) = x(1);
+for k = 2:p
+   y(a+1) = x(k);
+   a = rem(a*r,p);
+end
+</code><code id="eip-411" display="block">function [R, R_inv] = primitive_root(N)
+
+%  function [R, R_inv] = primitive_root(N)
+%  Ivan Selesnick
+%  N is assumed to be prime.  This function returns R,
+%  the smallest	primitive root of N, and R_inv, the 
+%  inverse of R modulo N.
+
+R = 'Not Found';
+m = 0:(N-2);
+for x = 1:(N-1)
+   if ( 1:(N-1) == sort(rem2(x,m,N)) )
+      R = x;
+      break
+   end
+end
+R_inv = 'Not Found';
+for x = 1:N
+   if rem(x*R,N) == 1
+      R_inv = x;
+      break
+   end
+end
+</code>
+    </section>
+  </content>
+  <bib:file/>
+</document>

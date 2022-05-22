@@ -1,0 +1,5399 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Preliminaries</title>
+  <metadata>
+  <md:content-id>m18132</md:content-id><md:title>Preliminaries</md:title>
+  <md:abstract>This collection of modules is from a Rice University, ECE Department Technical Report written around September 1994. It grew out of the doctoral and post doctoral research of Ivan Selesnick working with Prof. C. Sidney Burrus at Rice. Earlier reports on this work were published in the ICASSP and ISCAS conference proceedings in 1992-94 and a fairly complete report was published in the IEEE Transaction on Signal Processing in January 1996.</md:abstract>
+  <md:uuid>c63af99c-009b-4247-bfcc-c7906b7af09d</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Preliminaries</title>
+      <para id="id2253722">Because we compute prime point DFTs by converting them in to
+circular convolutions, most of this and the next section is devoted
+to an explanation of the split nesting convolution algorithm.
+In this section we introduce the various operations needed
+to carry out the split nesting algorithm.
+In particular, we describe the prime factor permutation
+that is used to convert a one-dimensional circular convolution
+into a multi-dimensional one.
+We also discuss the reduction operations needed when
+the Chinese Remainder Theorem for polynomials is used
+in the computation of convolution.
+The reduction operations needed for the split nesting algorithm
+are particularly well organized.
+We give an explicit matrix description of the reduction operations
+and give a program that implements the action of these
+reduction operations.</para>
+      <para id="id2253739">The presentation relies upon the notions of similarity
+transformations, companion matrices and Kronecker products.
+With them, we describe the split nesting algorithm in a manner
+that brings out its structure.
+We find that when companion matrices are used to describe
+convolution, the reduction operations block diagonalizes
+the circular shift matrix.</para>
+      <para id="id2253748"><emphasis>The companion matrix</emphasis>
+
+of a monic polynomial,
+<m:math><m:mrow><m:mi>M</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mi>m</m:mi><m:mn>0</m:mn></m:msub><m:mo>+</m:mo><m:msub><m:mi>m</m:mi><m:mn>1</m:mn></m:msub><m:mi>s</m:mi><m:mo>+</m:mo><m:mo>⋯</m:mo><m:mo>+</m:mo><m:msub><m:mi>m</m:mi><m:mrow><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub><m:msup><m:mi>s</m:mi><m:mrow><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup><m:mo>+</m:mo><m:msup><m:mi>s</m:mi><m:mi>n</m:mi></m:msup></m:mrow></m:math>
+is given by</para>
+      <equation id="uid1"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>C</m:mi>
+              <m:mi>M</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>m</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd><m:mn>1</m:mn></m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>m</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋱</m:mo>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋮</m:mo>
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>m</m:mi>
+                        <m:mrow>
+                          <m:mi>n</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2254178">Its usefulness in the following discussion comes from
+the following relation which permits a matrix formulation
+of convolution.
+Let</para>
+      <equation id="id2254185">
+        <m:math mode="display">
+          <m:mtable displaystyle="true">
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:mi>X</m:mi>
+                  <m:mo>(</m:mo>
+                  <m:mi>s</m:mi>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+                    <m:mn>0</m:mn>
+                  </m:msub>
+                  <m:mo>+</m:mo>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                  <m:mi>s</m:mi>
+                  <m:mo>+</m:mo>
+                  <m:mo>⋯</m:mo>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                  <m:msup>
+                    <m:mi>s</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msup>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:mi>H</m:mi>
+                  <m:mo>(</m:mo>
+                  <m:mi>s</m:mi>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>h</m:mi>
+                    <m:mn>0</m:mn>
+                  </m:msub>
+                  <m:mo>+</m:mo>
+                  <m:msub>
+                    <m:mi>h</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                  <m:mi>s</m:mi>
+                  <m:mo>+</m:mo>
+                  <m:mo>⋯</m:mo>
+                  <m:msub>
+                    <m:mi>h</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                  <m:msup>
+                    <m:mi>s</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msup>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:mi>Y</m:mi>
+                  <m:mo>(</m:mo>
+                  <m:mi>s</m:mi>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>y</m:mi>
+                    <m:mn>0</m:mn>
+                  </m:msub>
+                  <m:mo>+</m:mo>
+                  <m:msub>
+                    <m:mi>y</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                  <m:mi>s</m:mi>
+                  <m:mo>+</m:mo>
+                  <m:mo>⋯</m:mo>
+                  <m:msub>
+                    <m:mi>y</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                  <m:msup>
+                    <m:mi>s</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msup>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:mi>M</m:mi>
+                  <m:mo>(</m:mo>
+                  <m:mi>s</m:mi>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>m</m:mi>
+                    <m:mn>0</m:mn>
+                  </m:msub>
+                  <m:mo>+</m:mo>
+                  <m:msub>
+                    <m:mi>m</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                  <m:mi>s</m:mi>
+                  <m:mo>+</m:mo>
+                  <m:mo>⋯</m:mo>
+                  <m:msub>
+                    <m:mi>m</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                  <m:msup>
+                    <m:mi>s</m:mi>
+                    <m:mrow>
+                      <m:mi>n</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msup>
+                  <m:mo>+</m:mo>
+                  <m:msup>
+                    <m:mi>s</m:mi>
+                    <m:mi>n</m:mi>
+                  </m:msup>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </equation>
+      <para id="id2254486">Then</para>
+      <equation id="uid2"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Y</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>=</m:mo>
+            <m:mspace width="3.33333pt"/>
+            <m:mo>〈</m:mo>
+            <m:mspace width="0.277778em"/>
+            <m:mi>H</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mi>X</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+
+<m:mo>〉</m:mo>
+            
+            <m:mrow>
+              <m:mi>M</m:mi>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+</m:msub>
+            <m:mspace width="0.277778em"/>
+            <m:mspace width="0.277778em"/>
+            <m:mo>⇔</m:mo>
+            <m:mspace width="0.277778em"/>
+            <m:mspace width="0.277778em"/>
+            <m:mi>y</m:mi>
+            <m:mo>=</m:mo>
+            <m:mfenced separators="" open="(" close=")">
+              <m:munderover>
+<m:mrow>
+                <m:mo>∑</m:mo>
+</m:mrow>            
+    <m:mrow>
+                  <m:mi>k</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>n</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:msub>
+                <m:mi>h</m:mi>
+                <m:mi>k</m:mi>
+              </m:msub>
+              <m:msubsup>
+                <m:mi>C</m:mi>
+                <m:mi>M</m:mi>
+                <m:mi>k</m:mi>
+              </m:msubsup>
+            </m:mfenced>
+            <m:mi>x</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2254621">where <m:math><m:mrow><m:mi>y</m:mi><m:mo>=</m:mo><m:msup><m:mrow><m:mo>(</m:mo><m:msub><m:mi>y</m:mi><m:mn>0</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>y</m:mi><m:mrow><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup></m:mrow></m:math>,
+<m:math><m:mrow><m:mi>x</m:mi><m:mo>=</m:mo><m:msup><m:mrow><m:mo>(</m:mo><m:msub><m:mi>x</m:mi><m:mn>0</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>x</m:mi><m:mrow><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup></m:mrow></m:math>,
+and <m:math><m:msub><m:mi>C</m:mi><m:mi>M</m:mi></m:msub></m:math> is the companion matrix of <m:math><m:mrow><m:mi>M</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math>.
+In <link target-id="uid2"/>, we say <m:math><m:mi>y</m:mi></m:math> is the convolution of <m:math><m:mi>x</m:mi></m:math> and
+<m:math><m:mi>h</m:mi></m:math> with respect to <m:math><m:mrow><m:mi>M</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math>.
+In the case of circular convolution,
+<m:math><m:mrow><m:mi>M</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msup><m:mi>s</m:mi><m:mi>n</m:mi></m:msup><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> and <m:math><m:msub><m:mi>C</m:mi><m:mrow><m:msup><m:mi>s</m:mi><m:mi>n</m:mi></m:msup><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub></m:math> is
+the circular shift matrix
+denoted by <m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math>,</para>
+      <equation id="id2254871"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mi>n</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                   
+                      <m:mn>1</m:mn>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      
+<m:mn>1</m:mn>
+                    
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋱</m:mo>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+       <m:mtd/>             
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2254925">Notice that any circulant matrix can be written as
+<m:math><m:mrow><m:msub><m:mo>∑</m:mo><m:mi>k</m:mi></m:msub><m:msub><m:mi>h</m:mi><m:mi>k</m:mi></m:msub><m:msubsup><m:mi>S</m:mi><m:mrow><m:mi>n</m:mi></m:mrow><m:mi>k</m:mi></m:msubsup></m:mrow></m:math>.</para>
+      <para id="id2254965"><emphasis>Similarity transformations</emphasis>
+
+can be used to interpret the action of some convolution algorithms.
+If <m:math><m:mrow><m:msub><m:mi>C</m:mi><m:mi>M</m:mi></m:msub><m:mo>=</m:mo><m:msup><m:mi>T</m:mi><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup><m:mi>A</m:mi><m:mi>T</m:mi></m:mrow></m:math> for some matrix <m:math><m:mi>T</m:mi></m:math>
+(<m:math><m:msub><m:mi>C</m:mi><m:mi>M</m:mi></m:msub></m:math> and <m:math><m:mi>A</m:mi></m:math> are similar, denoted
+<m:math><m:mrow><m:msub><m:mi>C</m:mi><m:mi>M</m:mi></m:msub><m:mo>∼</m:mo><m:mi>A</m:mi></m:mrow></m:math>),
+then <link target-id="uid2"/> becomes</para>
+      <equation id="uid3"><m:math mode="display">
+          <m:mrow>
+            <m:mi>y</m:mi>
+            <m:mo>=</m:mo>
+            <m:msup>
+              <m:mi>T</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mfenced separators="" open="(" close=")">
+              <m:munderover>
+<m:mrow>
+                <m:mo>∑</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>k</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>n</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:msub>
+                <m:mi>h</m:mi>
+                <m:mi>k</m:mi>
+              </m:msub>
+              <m:msup>
+                <m:mi>A</m:mi>
+                <m:mi>k</m:mi>
+              </m:msup>
+            </m:mfenced>
+            <m:mi>T</m:mi>
+            <m:mi>x</m:mi>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2255138">That is, by employing the similarity transformation given
+by <m:math><m:mi>T</m:mi></m:math> in this way, the action of <m:math><m:msubsup><m:mi>S</m:mi><m:mrow><m:mi>n</m:mi></m:mrow><m:mi>k</m:mi></m:msubsup></m:math> is
+replaced by that of <m:math><m:msup><m:mi>A</m:mi><m:mi>k</m:mi></m:msup></m:math>.
+Many circular convolution algorithms can be understood,
+in part,
+by understanding the manipulations made to <m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math>
+and the resulting new matrix <m:math><m:mi>A</m:mi></m:math>.
+If the transformation <m:math><m:mi>T</m:mi></m:math> is to be useful,
+it must satisfy two requirements:
+(1) <m:math><m:mrow><m:mi>T</m:mi><m:mi>x</m:mi></m:mrow></m:math> must be simple to compute, and
+(2) <m:math><m:mi>A</m:mi></m:math> must have some advantageous structure.
+For example, by the convolution property of the DFT,
+the DFT matrix <m:math><m:mi>F</m:mi></m:math> diagonalizes <m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math>,</para>
+      <equation id="id2255267"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mi>n</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:msup>
+              <m:mi>F</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msup>
+                      <m:mi>w</m:mi>
+                      <m:mn>0</m:mn>
+                    </m:msup>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>                  
+<m:mtd>
+                    <m:msup>
+                      <m:mi>w</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msup>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋱</m:mo>
+                  </m:mtd>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msup>
+                      <m:mi>w</m:mi>
+                      <m:mrow>
+                        <m:mi>n</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:msup>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mi>F</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2255353">so that it diagonalizes every circulant matrix.
+In this case, <m:math><m:mrow><m:mi>T</m:mi><m:mi>x</m:mi></m:mrow></m:math> can be computed by using an FFT and
+the structure of <m:math><m:mi>A</m:mi></m:math> is the simplest possible.
+So the two above mentioned conditions are met.</para>
+      <para id="id2255382"><emphasis>The Winograd Structure</emphasis>
+
+can be described in this manner also.
+Suppose <m:math><m:mrow><m:mi>M</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> can be factored as <m:math><m:mrow><m:mi>M</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mi>M</m:mi><m:mn>1</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:msub><m:mi>M</m:mi><m:mn>2</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+where <m:math><m:msub><m:mi>M</m:mi><m:mn>1</m:mn></m:msub></m:math> and <m:math><m:msub><m:mi>M</m:mi><m:mn>2</m:mn></m:msub></m:math> have no common roots,
+then <m:math><m:mrow><m:msub><m:mi>C</m:mi><m:mi>M</m:mi></m:msub><m:mo>∼</m:mo><m:mfenced separators="" open="(" close=")"><m:msub><m:mi>C</m:mi><m:msub><m:mi>M</m:mi><m:mn>1</m:mn></m:msub></m:msub><m:mo>⊕</m:mo><m:msub><m:mi>C</m:mi><m:msub><m:mi>M</m:mi><m:mn>2</m:mn></m:msub></m:msub></m:mfenced></m:mrow></m:math>
+where <m:math><m:mo>⊕</m:mo></m:math> denotes the matrix direct sum.
+Using this similarity and recalling <link target-id="uid2"/>,
+the original convolution is decomposed into
+disjoint convolutions.
+This is, in fact, a statement of the Chinese Remainder Theorem
+for polynomials expressed in matrix notation.
+In the case of circular convolution,
+<m:math><m:mrow><m:msup><m:mi>s</m:mi><m:mi>n</m:mi></m:msup><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>=</m:mo><m:msub><m:mo>∏</m:mo><m:mrow><m:mi>d</m:mi><m:mo>|</m:mo><m:mi>n</m:mi></m:mrow></m:msub><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>, so that
+<m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math> can be transformed to a block diagonal matrix,</para>
+      <equation id="uid4"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mi>n</m:mi>
+            </m:msub>
+            <m:mo>∼</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mi>d</m:mi>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>                    
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋱</m:mo>
+                  </m:mtd>
+                  <m:mtd/>
+                  </m:mtr>
+<m:mtr>
+
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mi>n</m:mi>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:mfenced separators="" open="(" close=")">
+              <m:munder>
+                <m:mo>⊕</m:mo>
+                <m:mrow>
+                  <m:mi>d</m:mi>
+                  <m:mo>|</m:mo>
+                  <m:mi>n</m:mi>
+                </m:mrow>
+              </m:munder>
+              <m:msub>
+                <m:mi>C</m:mi>
+                <m:msub>
+                  <m:mi>Φ</m:mi>
+                  <m:mi>d</m:mi>
+                </m:msub>
+              </m:msub>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2255739">where <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> is the <m:math><m:msup><m:mi>d</m:mi><m:mrow><m:mi>t</m:mi><m:mi>h</m:mi></m:mrow></m:msup></m:math> cyclotomic polynomial.
+In this case, each block represents a convolution
+with respect to a cyclotomic polynomial, or a
+`cyclotomic convolution'.
+Winograd's approach carries out these cyclotomic convolutions
+using the Toom-Cook algorithm.
+Note that for each divisor, <m:math><m:mi>d</m:mi></m:math>, of <m:math><m:mi>n</m:mi></m:math> there is a
+corresponding block on the diagonal of size
+<m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo></m:mrow></m:math>,
+for the degree of <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+is <m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+where <m:math><m:mrow><m:mi>φ</m:mi><m:mo>(</m:mo><m:mo>·</m:mo><m:mo>)</m:mo></m:mrow></m:math> is the Euler totient function.
+This method is good for short lengths, but
+as <m:math><m:mi>n</m:mi></m:math> increases
+the cyclotomic convolutions become cumbersome,
+for as the number of distinct prime divisors of <m:math><m:mi>d</m:mi></m:math>
+increases,
+the operation described by <m:math><m:mrow><m:msub><m:mo>∑</m:mo><m:mi>k</m:mi></m:msub><m:msub><m:mi>h</m:mi><m:mi>k</m:mi></m:msub><m:msup><m:mfenced separators="" open="(" close=")"><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub></m:msub></m:mfenced><m:mi>k</m:mi></m:msup></m:mrow></m:math>
+becomes more difficult to implement.</para>
+      <para id="id2255946"><emphasis>The Agarwal-Cooley Algorithm</emphasis>
+
+utilizes the fact that</para>
+      <equation id="uid5">
+        <m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mi>n</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:msup>
+              <m:mi>P</m:mi>
+              <m:mi>t</m:mi>
+            </m:msup>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:msub>
+            </m:mfenced>
+            <m:mi>P</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2256022">where <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math>, <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub><m:mo>)</m:mo><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow></m:math> and
+<m:math><m:mi>P</m:mi></m:math> is an appropriate permutation <link target-id="bid0"/>.
+This converts the one dimensional circular convolution
+of length <m:math><m:mi>n</m:mi></m:math> to a two dimensional one of length
+<m:math><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:math> along one dimension and length <m:math><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:math> along
+the second.
+Then an <m:math><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:math>-point and an <m:math><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:math>-point circular convolution
+algorithm can be combined to obtain an <m:math><m:mi>n</m:mi></m:math>-point algorithm.
+In polynomial notation, the mapping accomplished by
+this permutation
+<m:math><m:mi>P</m:mi></m:math> can be informally indicated by</para>
+      <equation id="id2256195"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Y</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>=</m:mo>
+            <m:mspace width="3.33333pt"/>
+            <m:mo>〈</m:mo>
+            <m:mspace width="0.277778em"/>
+            <m:mi>X</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mi>H</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+            <m:mrow>
+              <m:msup>
+                <m:mi>s</m:mi>
+                <m:mi>n</m:mi>
+              </m:msup>
+              <m:mo>-</m:mo>
+              <m:mn>1</m:mn>
+            </m:mrow>
+</m:msub>
+            <m:mover>
+              <m:mo>⇔</m:mo>
+              <m:mi>P</m:mi>
+            </m:mover>
+            <m:mi>Y</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>,</m:mo>
+              <m:mi>t</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>=</m:mo>
+            <m:mspace width="3.33333pt"/>
+            <m:mo>〈</m:mo>
+            <m:mspace width="0.277778em"/>
+            <m:mi>X</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>,</m:mo>
+              <m:mi>t</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mi>H</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>,</m:mo>
+              <m:mi>t</m:mi>
+              <m:mo>)</m:mo>
+
+            </m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+            <m:mrow>
+              <m:msup>
+                <m:mi>s</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msup>
+              <m:mo>-</m:mo>
+              <m:mn>1</m:mn>
+              <m:mo>,</m:mo>
+              <m:msup>
+                <m:mi>t</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:msup>
+              <m:mo>-</m:mo>
+              <m:mn>1</m:mn>
+            </m:mrow>
+</m:msub>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2256360">It should be noted that <link target-id="uid5"/>
+implies that a circulant matrix of size <m:math><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math> can be
+written as a block circulant matrix with circulant
+blocks.</para>
+      <para id="id2256396"><emphasis>The Split-Nesting algorithm</emphasis>
+
+<link target-id="bid1"/> combines the structures of the
+Winograd and Agarwal-Cooley methods, so that <m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math> is transformed
+to a block diagonal
+matrix as in <link target-id="uid4"/>,</para>
+      <equation id="uid6"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mi>n</m:mi>
+            </m:msub>
+            <m:mspace width="0.166667em"/>
+            <m:mo>∼</m:mo>
+            <m:mspace width="0.166667em"/>
+            <m:munder>
+              <m:mo>⊕</m:mo>
+              <m:mrow>
+                <m:mi>d</m:mi>
+                <m:mo>|</m:mo>
+                <m:mi>n</m:mi>
+              </m:mrow>
+            </m:munder>
+            <m:mi>Ψ</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>d</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2256483">Here
+<m:math><m:mrow><m:mi>Ψ</m:mi><m:mrow><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mo>⊗</m:mo><m:mrow><m:mi>p</m:mi><m:mo>|</m:mo><m:mi>d</m:mi><m:mo>,</m:mo><m:mi>p</m:mi><m:mo>∈</m:mo><m:mi mathvariant="script">P</m:mi></m:mrow></m:msub><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:mrow><m:msub><m:mi>H</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:msub></m:msub></m:mrow></m:math>
+where <m:math><m:mrow><m:msub><m:mi>H</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> is the highest power of <m:math><m:mi>p</m:mi></m:math> dividing <m:math><m:mi>d</m:mi></m:math>, and
+<m:math><m:mi mathvariant="script">P</m:mi></m:math> is the set of primes.</para>
+      
+      
+      
+      
+      <example id="element-527"><equation id="uid7"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mn>45</m:mn>
+            </m:msub>
+            <m:mo>∼</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+ </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>3</m:mn>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>5</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>9</m:mn>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>5</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+</example><para id="id2256815">In this structure a multidimensional cyclotomic convolution,
+represented by <m:math><m:mrow><m:mi>Ψ</m:mi><m:mo>(</m:mo><m:mi>d</m:mi><m:mo>)</m:mo></m:mrow></m:math>, replaces each cyclotomic convolution
+in Winograd's algorithm (represented by <m:math><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub></m:msub></m:math> in
+<link target-id="uid4"/>.
+Indeed, if the product of <m:math><m:mrow><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>b</m:mi><m:mi>k</m:mi></m:msub></m:mrow></m:math> is <m:math><m:mi>d</m:mi></m:math> and they are
+pairwise relatively prime, then
+<m:math><m:mrow><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub></m:msub><m:mo>∼</m:mo><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub></m:msub></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:msub><m:mi>b</m:mi><m:mi>k</m:mi></m:msub></m:msub></m:msub></m:mrow></m:math>.
+This gives a method for combining cyclotomic convolutions
+to compute a longer circular convolution.
+It is like the Agarwal-Cooley method but requires fewer
+additions <link target-id="bid1"/>.</para>
+    </section>
+    <section id="cid2">
+      <title>Prime Factor Permutations</title>
+      <para id="id2256988">One can obtain <m:math><m:mrow><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:msub></m:mrow></m:math> from
+<m:math><m:msub><m:mi>S</m:mi><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:msub></m:math> when <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub><m:mo>)</m:mo><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow></m:math>,
+for in this case,
+<m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math> is similar to <m:math><m:mrow><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:msub></m:mrow></m:math>, <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math>.
+Moreover, they are related by a permutation.
+This permutation is that of the prime factor FFT
+algorithms and is employed in nesting algorithms
+for circular convolution <link target-id="bid0"/>, <link target-id="bid2"/>.
+The permutation is described by Zalcstein <link target-id="bid3"/>,
+among others, and it is his description we draw on in the following.</para>
+      <para id="id2257189">Let <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math> where <m:math><m:mrow><m:mo>(</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub><m:mo>)</m:mo><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow></m:math>.
+Define <m:math><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:math>, (<m:math><m:mrow><m:mn>0</m:mn><m:mo>≤</m:mo><m:mi>k</m:mi><m:mo>≤</m:mo><m:mi>n</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>), to be the standard basis vector,
+<m:math><m:msup><m:mrow><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mn>0</m:mn><m:mo>,</m:mo><m:mn>1</m:mn><m:mo>,</m:mo><m:mn>0</m:mn><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow><m:mi>t</m:mi></m:msup></m:math>, where the 1 is in
+the <m:math><m:msup><m:mi>k</m:mi><m:mrow><m:mi>t</m:mi><m:mi>h</m:mi></m:mrow></m:msup></m:math> position.
+Then, the circular shift matrix, <m:math><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub></m:math>, can be described by</para>
+      <equation id="id2257371"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mi>n</m:mi>
+            </m:msub>
+            <m:msub>
+              <m:mi>e</m:mi>
+              <m:mi>k</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            
+<m:msub>
+              <m:mi>e</m:mi>
+              <m:mrow>
+                <m:mspace width="3.33333pt"/>
+                <m:mo>〈</m:mo>
+                <m:mspace width="0.277778em"/>
+                <m:mi>k</m:mi>
+                <m:mo>+</m:mo>
+                <m:mn>1</m:mn>
+                  <m:msub>
+                  <m:mo>〉</m:mo>
+                  <m:mi>n</m:mi>
+                  </m:msub>              
+</m:mrow>
+            </m:msub>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2257426">Note that, by inspection,</para>
+      <equation id="id2257432"><m:math mode="display">
+          <m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:msub>
+              <m:mi>e</m:mi>
+              <m:mrow>
+                <m:mi>a</m:mi>
+                <m:mo>+</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+                <m:mi>b</m:mi>
+              </m:mrow>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:msub>
+              <m:mi>e</m:mi>
+              <m:mrow>
+                <m:mspace width="3.33333pt"/>
+                <m:mo>〈</m:mo>
+                <m:mspace width="0.277778em"/>
+                <m:mi>a</m:mi>
+                <m:mo>+</m:mo>
+                <m:mn>1</m:mn>
+                <m:msub>
+                <m:mo>〉</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+                </m:msub>
+                <m:mo>+</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+                <m:mspace width="3.33333pt"/>
+                <m:mo>〈</m:mo>
+                <m:mspace width="0.277778em"/>
+                <m:mi>b</m:mi>
+                <m:mo>+</m:mo>
+                <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+</m:msub>
+              </m:mrow>
+            </m:msub>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2257563">where <m:math><m:mrow><m:mn>0</m:mn><m:mo>≤</m:mo><m:mi>a</m:mi><m:mo>≤</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> and <m:math><m:mrow><m:mn>0</m:mn><m:mo>≤</m:mo><m:mi>b</m:mi><m:mo>≤</m:mo><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>.
+Because <m:math><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:math> and <m:math><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:math> are relatively prime a permutation matrix <m:math><m:mi>P</m:mi></m:math>
+can be defined by</para>
+      <equation id="id2257666"><m:math mode="display">
+          <m:mrow>
+            <m:mi>P</m:mi>
+            <m:msub>
+              <m:mi>e</m:mi>
+              <m:mi>k</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:msub>
+              <m:mi>e</m:mi>
+              <m:mrow>
+                <m:mspace width="3.33333pt"/>
+                <m:mo>〈</m:mo>
+                <m:mspace width="0.277778em"/>
+                <m:mi>k</m:mi>
+<m:msub>
+<m:mo>〉</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+</m:msub>
+                <m:mo>+</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+                <m:mspace width="3.33333pt"/>
+                <m:mo>〈</m:mo>
+                <m:mspace width="0.277778em"/>
+                <m:mi>k</m:mi>
+<m:msub>
+                <m:mo>〉</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+</m:msub>
+              </m:mrow>
+            </m:msub>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2257747">With this <m:math><m:mi>P</m:mi></m:math>,</para>
+      <equation id="id2257762"><m:math mode="display">
+          <m:mtable displaystyle="true">
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:mi>P</m:mi>
+                  <m:msub>
+                    <m:mi>S</m:mi>
+                    <m:mi>n</m:mi>
+                  </m:msub>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:mi>P</m:mi>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mrow>
+                      <m:mspace width="3.33333pt"/>
+                      <m:mo>〈</m:mo>
+                      <m:mspace width="0.277778em"/>
+                      <m:mi>k</m:mi>
+                      <m:mo>+</m:mo>
+                      <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                      <m:mi>n</m:mi>
+</m:msub>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mrow>
+                    <m:mspace width="3.33333pt"/>
+                    <m:mo>〈</m:mo>
+                    <m:mspace width="0.277778em"/>
+                    <m:mspace width="3.33333pt"/>
+                    <m:mo>〈</m:mo>
+                    <m:mspace width="0.277778em"/>
+                    <m:mi>k</m:mi>
+                    <m:mo>+</m:mo>
+                    <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                    <m:mi>n</m:mi>
+</m:msub>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+                    <m:msub>
+                      <m:mi>n</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msub>
+</m:mrow>
+</m:msub>
+                    <m:mo>+</m:mo>
+                    <m:msub>
+                      <m:mi>n</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                    <m:mspace width="3.33333pt"/>
+                    <m:mo>〈</m:mo>
+                    <m:mspace width="0.277778em"/>
+                    <m:mspace width="3.33333pt"/>
+                    <m:mo>〈</m:mo>
+                    <m:mspace width="0.277778em"/>
+                    <m:mi>k</m:mi>
+                    <m:mo>+</m:mo>
+                    <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                    <m:mi>n</m:mi>
+</m:msub>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:msub>
+                      <m:mi>n</m:mi>
+                      <m:mn>2</m:mn>
+                    </m:msub>
+</m:msub>
+                  </m:mrow>
+                </m:msub>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mrow>
+                    <m:mspace width="3.33333pt"/>
+                    <m:mo>〈</m:mo>
+                    <m:mspace width="0.277778em"/>
+                    <m:mi>k</m:mi>
+                    <m:mo>+</m:mo>
+                    <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                    <m:msub>
+                      <m:mi>n</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msub>
+</m:msub>
+                    <m:mo>+</m:mo>
+                    <m:msub>
+                      <m:mi>n</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                    <m:mspace width="3.33333pt"/>
+                    <m:mo>〈</m:mo>
+                    <m:mspace width="0.277778em"/>
+                    <m:mi>k</m:mi>
+                    <m:mo>+</m:mo>
+                    <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                    <m:msub>
+                      <m:mi>n</m:mi>
+                      <m:mn>2</m:mn>
+                    </m:msub>
+</m:msub>
+                  </m:mrow>
+                </m:msub>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </equation>
+      <para id="id2258007">and</para>
+      <equation id="id2258012"><m:math mode="display">
+          <m:mtable displaystyle="true">
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:mrow>
+                    <m:mo>(</m:mo>
+                    <m:msub>
+                      <m:mi>S</m:mi>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:msub>
+                    <m:mo>⊗</m:mo>
+                    <m:msub>
+                      <m:mi>S</m:mi>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:msub>
+                    <m:mo>)</m:mo>
+                  </m:mrow>
+                  <m:mi>P</m:mi>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:mrow>
+                    <m:mo>(</m:mo>
+                    <m:msub>
+                      <m:mi>S</m:mi>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:msub>
+                    <m:mo>⊗</m:mo>
+                    <m:msub>
+                      <m:mi>S</m:mi>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:msub>
+                    <m:mo>)</m:mo>
+                  </m:mrow>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mrow>
+                      <m:mspace width="3.33333pt"/>
+                      <m:mo>〈</m:mo>
+                      <m:mspace width="0.277778em"/>
+                      <m:mi>k</m:mi>
+<m:msub>
+<m:mo>〉</m:mo>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+</m:msub>
+                      <m:mo>+</m:mo>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                      <m:mspace width="3.33333pt"/>
+                      <m:mo>〈</m:mo>
+                      <m:mspace width="0.277778em"/>
+                      <m:mi>k</m:mi>
+<m:msub>
+<m:mo>〉</m:mo>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+</m:msub>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mrow>
+                      <m:mspace width="3.33333pt"/>
+                      <m:mo>〈</m:mo>
+                      <m:mspace width="0.277778em"/>
+                      <m:mi>k</m:mi>
+                      <m:mo>+</m:mo>
+                      <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+</m:msub>
+                      <m:mo>+</m:mo>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                      <m:mspace width="3.33333pt"/>
+                      <m:mo>〈</m:mo>
+                      <m:mspace width="0.277778em"/>
+                      <m:mi>k</m:mi>
+                      <m:mo>+</m:mo>
+                      <m:mn>1</m:mn>
+<m:msub>
+<m:mo>〉</m:mo>
+                      <m:msub>
+                        <m:mi>n</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+</m:msub>
+                    </m:mrow>
+                  </m:msub>
+                  <m:mo>.</m:mo>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </equation>
+      <para id="id2258250">Since <m:math><m:mrow><m:mi>P</m:mi><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub><m:mo>=</m:mo><m:mrow><m:mo>(</m:mo><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:msub><m:mo>)</m:mo></m:mrow><m:mi>P</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:mrow></m:math>
+and <m:math><m:mrow><m:msup><m:mi>P</m:mi><m:mrow><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup><m:mo>=</m:mo><m:msup><m:mi>P</m:mi><m:mi>t</m:mi></m:msup></m:mrow></m:math>, one gets, in the multi-factor case, the following.</para>
+      <rule id="lemma1" type="Lemma"><label>Lemma</label>
+<statement id="id10136419"> 
+<para id="element-232498698234">If <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>⋯</m:mo><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub></m:mrow></m:math> and <m:math><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>...</m:mo><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub></m:mrow></m:math> are pairwise
+relatively prime, then
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub><m:mo>=</m:mo><m:msup><m:mi>P</m:mi><m:mi>t</m:mi></m:msup><m:mrow><m:mo>(</m:mo><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>S</m:mi><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:msub><m:mo>)</m:mo></m:mrow><m:mi>P</m:mi></m:mrow></m:mstyle></m:math>
+where <m:math><m:mi>P</m:mi></m:math> is the permutation matrix given by
+
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:mi>P</m:mi>
+<m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub>
+<m:mo>=</m:mo><m:msub><m:mi>e</m:mi><m:mrow>
+<m:mspace width="3.33333pt"/><m:mo>〈</m:mo><m:mspace width="0.277778em"/><m:mi>k</m:mi>
+<m:msub><m:mo>〉</m:mo>
+<m:msub><m:mi>n</m:mi><m:mn>1</m:mn>
+</m:msub></m:msub>
+<m:mo>+</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub>
+<m:mspace width="3.33333pt"/><m:mo>〈</m:mo><m:mspace width="0.277778em"/><m:mi>k</m:mi>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:msub><m:mi>n</m:mi><m:mn>2</m:mn>
+</m:msub></m:msub>
+<m:mo>+</m:mo><m:mo>⋯</m:mo><m:mo>+</m:mo>
+<m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>⋯</m:mo>
+<m:msub><m:mi>n</m:mi><m:mrow><m:mi>k</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub><m:mspace width="3.33333pt"/><m:mo>〈</m:mo><m:mspace width="0.277778em"/><m:mi>k</m:mi>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:msub>
+<m:mi>n</m:mi>
+<m:mi>k</m:mi></m:msub>
+</m:msub></m:mrow></m:msub></m:mrow></m:mstyle></m:math>.</para>
+</statement>
+</rule>
+      <para id="id2258634">This useful permutation will be denoted here as
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:msub><m:mi>P</m:mi><m:mrow><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:mrow></m:msub></m:mstyle></m:math>.
+If <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mn>2</m:mn><m:msub><m:mi>e</m:mi><m:mn>2</m:mn></m:msub></m:msubsup><m:mo>⋯</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:math> then
+this permutation yields the matrix, <m:math><m:mrow><m:msub><m:mi>S</m:mi><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>S</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:msub></m:mrow></m:math>. This product can be written
+simply as <m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:munderover><m:mo>⊗</m:mo><m:mrow><m:mi>i</m:mi><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow><m:mi>k</m:mi></m:munderover><m:msub><m:mi>S</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>i</m:mi><m:msub><m:mi>e</m:mi><m:mi>i</m:mi></m:msub></m:msubsup></m:msub></m:mrow></m:mstyle></m:math>, so that
+one has
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:msub><m:mi>S</m:mi><m:mi>n</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mi>P</m:mi><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub></m:mrow><m:mi>t</m:mi></m:msubsup><m:mfenced separators="" open="(" close=")"><m:munderover><m:mo>⊗</m:mo><m:mrow><m:mi>i</m:mi><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow><m:mi>k</m:mi></m:munderover><m:msub><m:mi>S</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>i</m:mi><m:msub><m:mi>e</m:mi><m:mi>i</m:mi></m:msub></m:msubsup></m:msub></m:mfenced><m:msub><m:mi>P</m:mi><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub></m:mrow></m:msub></m:mrow></m:mstyle></m:math>.</para>
+      <para id="id2258978">It is quite simple to show that</para>
+      <equation id="id2258982">
+        <m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>P</m:mi>
+              <m:mrow>
+                <m:mi>a</m:mi>
+                <m:mo>,</m:mo>
+                <m:mi>b</m:mi>
+                <m:mo>,</m:mo>
+                <m:mi>c</m:mi>
+              </m:mrow>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mi>a</m:mi>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>P</m:mi>
+                <m:mrow>
+                  <m:mi>b</m:mi>
+                  <m:mo>,</m:mo>
+                  <m:mi>c</m:mi>
+                </m:mrow>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:msub>
+              <m:mi>P</m:mi>
+              <m:mrow>
+                <m:mi>a</m:mi>
+                <m:mo>,</m:mo>
+                <m:mi>b</m:mi>
+                <m:mi>c</m:mi>
+              </m:mrow>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>P</m:mi>
+                <m:mrow>
+                  <m:mi>a</m:mi>
+                  <m:mo>,</m:mo>
+                  <m:mi>b</m:mi>
+                </m:mrow>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mi>c</m:mi>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:msub>
+              <m:mi>P</m:mi>
+              <m:mrow>
+                <m:mi>a</m:mi>
+                <m:mi>b</m:mi>
+                <m:mo>,</m:mo>
+                <m:mi>c</m:mi>
+              </m:mrow>
+            </m:msub>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2259102">In general, one has</para>
+      <equation id="uid9"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>P</m:mi>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+                <m:mo>,</m:mo>
+                <m:mo>⋯</m:mo>
+                <m:mo>,</m:mo>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mi>k</m:mi>
+                </m:msub>
+              </m:mrow>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:munderover>
+<m:mrow>
+              <m:mo>∏</m:mo>
+</m:mrow>        
+      <m:mrow>
+                <m:mi>i</m:mi>
+                <m:mo>=</m:mo>
+                <m:mn>2</m:mn>
+              </m:mrow>
+              <m:mi>k</m:mi>
+            </m:munderover>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>P</m:mi>
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>n</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                  <m:mo>⋯</m:mo>
+                  <m:msub>
+                    <m:mi>n</m:mi>
+                    <m:mrow>
+                      <m:mi>i</m:mi>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                  <m:mo>,</m:mo>
+                  <m:msub>
+                    <m:mi>n</m:mi>
+                    <m:mi>i</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>n</m:mi>
+                    <m:mrow>
+                      <m:mi>i</m:mi>
+                      <m:mo>+</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msub>
+                  <m:mo>⋯</m:mo>
+                  <m:msub>
+                    <m:mi>n</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2259244">A Matlab function for <m:math><m:mrow><m:msub><m:mi>P</m:mi><m:mrow><m:mi>a</m:mi><m:mo>,</m:mo><m:mi>b</m:mi></m:mrow></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:mi>s</m:mi></m:msub></m:mrow></m:math> is
+<code>pfp2I()</code>
+ in one of the appendices.
+This program is a direct implementation
+of the definition.
+In a paper by Templeton <link target-id="bid4"/>, another method for
+implementing <m:math><m:msub><m:mi>P</m:mi><m:mrow><m:mi>a</m:mi><m:mo>,</m:mo><m:mi>b</m:mi></m:mrow></m:msub></m:math>, without `if' statements,
+is given. That method requires some precalculations, however.
+A function for
+<m:math><m:msub><m:mi>P</m:mi><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msub><m:mi>n</m:mi><m:mi>k</m:mi></m:msub></m:mrow></m:msub></m:math> is
+<code>pfp()</code>. It uses <link target-id="uid9"/> and calls
+<code>pfp2I()</code> with the appropriate arguments.</para>
+    </section>
+    <section id="cid3">
+      <title>Reduction Operations</title>
+      <para id="id2259375">The Chinese Remainder Theorem for polynomials can be used to
+decompose a convolution of two sequences
+(the polynomial product of two polynomials evaluated
+modulo a third polynomial)
+into smaller convolutions (smaller polynomial products) <link target-id="bid5"/>.
+The Winograd <m:math><m:mi>n</m:mi></m:math> point circular convolution algorithm
+requires that polynomials are reduced modulo the
+cyclotomic polynomial factors of <m:math><m:mrow><m:msup><m:mi>s</m:mi><m:mi>n</m:mi></m:msup><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>,
+<m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>d</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> for each <m:math><m:mi>d</m:mi></m:math> dividing <m:math><m:mi>n</m:mi></m:math>.</para>
+      <para id="id2259461">When <m:math><m:mi>n</m:mi></m:math> has several prime divisors the reduction operations
+become quite complicated and writing a program to implement them
+is difficult.
+However, when <m:math><m:mi>n</m:mi></m:math> is a prime power, the reduction
+operations are very structured and can be done in a straightforward manner.
+Therefore, by converting a one-dimensional convolution
+to a multi-dimensional one, in which the length is a prime power
+along each dimension,
+the split nesting algorithm avoids the need for
+complicated reductions operations.
+This is one advantage the split nesting algorithm has over
+the Winograd algorithm.</para>
+      <para id="id2259492">By applying the reduction operations appropriately to the circular
+shift matrix, we are able to obtain a block diagonal form,
+just as in the Winograd convolution algorithm.
+However, in the split nesting algorithm, each diagonal block
+represents multi-dimensional cyclotomic convolution
+rather than a one-dimensional one.
+By forming multi-dimensional convolutions out of one-dimensional ones,
+it is possible to combine algorithms for smaller convolutions
+(see the next section).
+This is a second advantage split nesting algorithm has over
+the Winograd algorithm.
+The split nesting algorithm, however, generally uses more than
+the minimum number of multiplications.</para>
+      <para id="id2259506">Below we give an explicit matrix description of the required
+reduction operations, give a program that implements them,
+and give a formula for the number of additions required.
+(No multiplications are needed.)</para>
+      <para id="id2259513">First, consider <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:mi>p</m:mi></m:mrow></m:math>, a prime.
+Let</para>
+      <equation id="id2259531">
+        <m:math mode="display">
+          <m:mrow>
+            <m:mi>X</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>s</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>=</m:mo>
+            <m:msub>
+              <m:mi>x</m:mi>
+              <m:mn>0</m:mn>
+            </m:msub>
+            <m:mo>+</m:mo>
+            <m:msub>
+              <m:mi>x</m:mi>
+              <m:mn>1</m:mn>
+            </m:msub>
+            <m:mi>s</m:mi>
+            <m:mo>+</m:mo>
+            <m:mo>⋯</m:mo>
+            <m:mo>+</m:mo>
+            <m:msub>
+              <m:mi>x</m:mi>
+              <m:mrow>
+                <m:mi>p</m:mi>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msub>
+            <m:msup>
+              <m:mi>s</m:mi>
+              <m:mrow>
+                <m:mi>p</m:mi>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2259604">and recall <m:math><m:mrow><m:msup><m:mi>s</m:mi><m:mi>p</m:mi></m:msup><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>=</m:mo><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow><m:mrow><m:mo>(</m:mo><m:msup><m:mi>s</m:mi><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup><m:mo>+</m:mo><m:msup><m:mi>s</m:mi><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>2</m:mn></m:mrow></m:msup><m:mo>+</m:mo><m:mo>⋯</m:mo><m:mo>+</m:mo><m:mi>s</m:mi><m:mo>+</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mi>Φ</m:mi><m:mn>1</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>p</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>.
+
+The residue 
+<m:math>
+<m:mrow>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mn>1</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>
+is found by summing the coefficients of <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math>.
+  
+
+The residue <m:math>
+<m:mrow>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mi>p</m:mi>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>
+is given by
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:munderover><m:mo>∑</m:mo><m:mrow><m:mi>k</m:mi><m:mo>=</m:mo><m:mn>0</m:mn></m:mrow><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>2</m:mn></m:mrow></m:munderover><m:mrow><m:mo>(</m:mo><m:msub><m:mi>x</m:mi><m:mi>k</m:mi></m:msub><m:mo>-</m:mo><m:msub><m:mi>x</m:mi><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msub><m:mo>)</m:mo></m:mrow><m:msup><m:mi>s</m:mi><m:mi>k</m:mi></m:msup></m:mrow></m:mstyle></m:math>.
+
+
+Define <m:math><m:msub><m:mi>R</m:mi><m:mi>p</m:mi></m:msub></m:math> to be the matrix that
+reduces <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> modulo <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mn>1</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> and <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>p</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>,
+
+
+such that
+if 
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>X</m:mi>
+<m:mn>0</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mn>1</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>
+and
+
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>X</m:mi>
+<m:mn>1</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mi>p</m:mi>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>
+then</para>
+      <equation id="id2260101"><m:math mode="display">
+          <m:mrow>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                  
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mi>p</m:mi>
+            </m:msub>
+            <m:mi>X</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2260148">where <m:math><m:mi>X</m:mi></m:math>, <m:math><m:msub><m:mi>X</m:mi><m:mn>0</m:mn></m:msub></m:math> and <m:math><m:msub><m:mi>X</m:mi><m:mn>1</m:mn></m:msub></m:math> are vectors formed
+from the coefficients of <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math>, <m:math><m:mrow><m:msub><m:mi>X</m:mi><m:mn>0</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> and <m:math><m:mrow><m:msub><m:mi>X</m:mi><m:mn>1</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>.
+That is,</para>
+      <equation id="id2260254"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mi>p</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                   
+                      <m:mn>1</m:mn>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                   
+   <m:mn>1</m:mn>
+                    
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                                          <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                    
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2260345">so that <m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:msub><m:mi>R</m:mi><m:mi>p</m:mi></m:msub><m:mo>=</m:mo><m:mfenced open="[" close="]">
+<m:mtable><m:mtr><m:mtd>
+<m:msub>
+<m:mrow>
+<m:mn>1</m:mn>
+</m:mrow>
+<m:mrow>
+<m:mo>-</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd><m:msub><m:mi>G</m:mi><m:mi>p</m:mi></m:msub></m:mtd></m:mtr></m:mtable></m:mfenced></m:mrow></m:mstyle></m:math>
+where <m:math><m:msub><m:mi>G</m:mi><m:mi>p</m:mi></m:msub></m:math> is the <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>p</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> reduction matrix
+of size <m:math><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo><m:mo>×</m:mo><m:mi>p</m:mi></m:mrow></m:math>.
+Similarly,
+let <m:math><m:mrow><m:mi>X</m:mi><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow><m:mo>=</m:mo><m:msub><m:mi>x</m:mi><m:mn>0</m:mn></m:msub><m:mo>+</m:mo><m:msub><m:mi>x</m:mi><m:mn>1</m:mn></m:msub><m:mi>s</m:mi><m:mo>+</m:mo><m:mo>⋯</m:mo><m:mo>+</m:mo><m:msub><m:mi>x</m:mi><m:msup><m:mi>p</m:mi><m:mrow><m:mi>e</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup></m:msub><m:msup><m:mi>s</m:mi><m:msup><m:mi>p</m:mi><m:mrow><m:mi>e</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msup></m:msup></m:mrow></m:math> and
+define <m:math><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub></m:math>
+to be the matrix that reduces <m:math><m:mrow><m:mi>X</m:mi><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:math> modulo
+<m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mn>1</m:mn></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>, <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>p</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>, ..., <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+such that</para>
+      <equation id="id2260657"><m:math mode="display">
+          <m:mrow>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:mo>⋮</m:mo>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mi>e</m:mi>
+                      </m:msub>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:msup>
+                <m:mi>p</m:mi>
+                <m:mi>e</m:mi>
+              </m:msup>
+            </m:msub>
+            <m:mi>X</m:mi>
+            <m:mo>,</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2260720">where as above, <m:math><m:mi>X</m:mi></m:math>, <m:math><m:msub><m:mi>X</m:mi><m:mn>0</m:mn></m:msub></m:math>, ..., <m:math><m:msub><m:mi>X</m:mi><m:mi>e</m:mi></m:msub></m:math> are the coefficients
+of 
+<m:math>
+<m:mrow>
+<m:mi>X</m:mi>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:math>, 
+
+<m:math>
+<m:mrow>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mn>1</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>
+, ..., 
+
+<m:math>
+<m:mrow>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:msup>
+<m:mi>p</m:mi>
+<m:mi>e</m:mi>
+</m:msup>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>.</para>
+      <para id="id2260875">It turns out that <m:math>
+<m:msub>
+<m:mi>R</m:mi>
+<m:msup>
+<m:mi>p</m:mi>
+<m:mi>e</m:mi>
+</m:msup>
+</m:msub>
+</m:math> can be written in terms of 
+<m:math>
+<m:msub>
+<m:mi>R</m:mi>
+<m:mi>p</m:mi>
+</m:msub>
+</m:math>.
+Consider the reduction of 
+<m:math>
+<m:mrow>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:msub>
+<m:mi>x</m:mi>
+<m:mn>0</m:mn>
+</m:msub>
+<m:mo>+</m:mo>
+<m:mo>⋯</m:mo>
+<m:mo>+</m:mo>
+<m:msub>
+<m:mi>x</m:mi>
+<m:mn>8</m:mn>
+</m:msub>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>8</m:mn>
+</m:msup>
+</m:mrow>
+</m:math>
+by 
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mn>1</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mi>s</m:mi>
+<m:mo>-</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:math>, 
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mn>3</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>2</m:mn>
+</m:msup>
+<m:mo>+</m:mo>
+<m:mi>s</m:mi>
+<m:mo>+</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:math>, and 
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>Φ</m:mi>
+<m:mn>9</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>6</m:mn>
+</m:msup>
+<m:mo>+</m:mo>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>3</m:mn>
+</m:msup>
+<m:mo>+</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:math>.
+This is most efficiently performed by reducing <m:math>
+<m:mrow>
+<m:mi>X</m:mi>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+</m:math> in two steps.
+
+
+That is, calculate 
+<m:math>
+<m:mrow>
+<m:msup>
+<m:mi>X</m:mi>
+<m:mo>'</m:mo>
+</m:msup>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>3</m:mn>
+</m:msup>
+<m:mo>-</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math> and
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>X</m:mi>
+<m:mn>2</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:mi>X</m:mi>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>6</m:mn>
+</m:msup>
+<m:mo>+</m:mo>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>3</m:mn>
+</m:msup>
+<m:mo>+</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>.
+Then calculate <m:math>
+<m:mrow>
+<m:msub>
+<m:mi>X</m:mi>
+<m:mn>0</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:msup>
+<m:mi>X</m:mi>
+<m:mo>'</m:mo>
+</m:msup>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:mi>s</m:mi>
+<m:mo>-</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math> and
+<m:math>
+<m:mrow>
+<m:msub>
+<m:mi>X</m:mi>
+<m:mn>1</m:mn>
+</m:msub>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:mo>=</m:mo>
+<m:mspace width="3.33333pt"/>
+<m:mo>〈</m:mo>
+<m:mspace width="0.277778em"/>
+<m:msup>
+<m:mi>X</m:mi>
+<m:mo>'</m:mo>
+</m:msup>
+<m:mrow>
+<m:mo>(</m:mo>
+<m:mi>s</m:mi>
+<m:mo>)</m:mo>
+</m:mrow>
+<m:msub>
+<m:mo>〉</m:mo>
+<m:mrow>
+<m:msup>
+<m:mi>s</m:mi>
+<m:mn>2</m:mn>
+</m:msup>
+<m:mo>+</m:mo>
+<m:mi>s</m:mi>
+<m:mo>+</m:mo>
+<m:mn>1</m:mn>
+</m:mrow>
+</m:msub>
+</m:mrow>
+</m:math>.
+In matrix notation this becomes</para>
+      <equation id="id2261355"><m:math mode="display">
+          <m:mrow>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:msup>
+                        <m:mi>X</m:mi>
+                        <m:mo>'</m:mo>
+                      </m:msup>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:mfenced separators="" open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+                <m:mtr>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd columnalign="right">
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+                <m:mtr>
+                  <m:mtd/>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mi>X</m:mi>
+            <m:mspace width="7.22743pt"/>
+            <m:mtext>and</m:mtext>
+            <m:mspace width="7.22743pt"/>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:mfenced separators="" open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd columnalign="right">
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                </m:mtr>
+                <m:mtr>
+                  <m:mtd columnalign="right">
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd columnalign="right">
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+                <m:mtr>
+                  <m:mtd/>
+                  <m:mtd columnalign="right">
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:msup>
+              <m:mi>X</m:mi>
+              <m:mo>'</m:mo>
+            </m:msup>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2261592">Together these become</para>
+      <equation id="id2261598"><m:math mode="display">
+          <m:mrow>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                 
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>R</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mfenced separators="" open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+                <m:mtr>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd columnalign="right">
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+                <m:mtr>
+                  <m:mtd/>
+                  <m:mtd columnalign="right">
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd columnalign="right">
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mi>X</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2261779">or</para>
+      <equation id="id2261784"><m:math mode="display">
+          <m:mrow>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>0</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>X</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>3</m:mn>
+              </m:msub>
+              <m:mo>⊕</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>6</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>3</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>3</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mi>X</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2261876">so that
+<m:math><m:mrow><m:msub><m:mi>R</m:mi><m:mn>9</m:mn></m:msub><m:mo>=</m:mo><m:mrow><m:mo>(</m:mo><m:msub><m:mi>R</m:mi><m:mn>3</m:mn></m:msub><m:mo>⊕</m:mo><m:msub><m:mi>I</m:mi><m:mn>6</m:mn></m:msub><m:mo>)</m:mo></m:mrow><m:mrow><m:mo>(</m:mo><m:msub><m:mi>R</m:mi><m:mn>3</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:mn>3</m:mn></m:msub><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+where <m:math><m:mo>⊕</m:mo></m:math> denotes the matrix direct sum.
+Similarly, one finds that
+<m:math><m:mrow><m:msub><m:mi>R</m:mi><m:mn>27</m:mn></m:msub><m:mo>=</m:mo><m:mrow><m:mo>(</m:mo><m:msub><m:mi>R</m:mi><m:mn>3</m:mn></m:msub><m:mo>⊕</m:mo><m:msub><m:mi>I</m:mi><m:mn>24</m:mn></m:msub><m:mo>)</m:mo></m:mrow><m:mrow><m:mo>(</m:mo><m:mrow><m:mo>(</m:mo><m:msub><m:mi>R</m:mi><m:mn>3</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:mn>3</m:mn></m:msub><m:mo>)</m:mo></m:mrow><m:mo>⊕</m:mo><m:msub><m:mi>I</m:mi><m:mn>18</m:mn></m:msub><m:mo>)</m:mo></m:mrow><m:mrow><m:mo>(</m:mo><m:msub><m:mi>R</m:mi><m:mn>3</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:mn>9</m:mn></m:msub><m:mo>)</m:mo></m:mrow></m:mrow></m:math>.
+In general, one has the following.</para>
+<rule id="lemma2" type="Lemma"><label>Lemma</label>      
+<statement id="id10101297">
+<para id="id2262055"> 
+<m:math><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub></m:math> is a <m:math><m:mrow><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup><m:mo>×</m:mo><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:mrow></m:math> matrix given by
+<m:math><m:mstyle scriptlevel="0" displaystyle="true"><m:mrow><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub><m:mo>=</m:mo><m:munderover><m:mo>∏</m:mo><m:mrow><m:mi>k</m:mi><m:mo>=</m:mo><m:mn>0</m:mn></m:mrow><m:mrow><m:mi>e</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:munderover><m:mrow><m:mo>(</m:mo><m:mrow><m:mo>(</m:mo><m:msub><m:mi>R</m:mi><m:mi>p</m:mi></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>I</m:mi><m:msup><m:mi>p</m:mi><m:mi>k</m:mi></m:msup></m:msub><m:mo>)</m:mo></m:mrow><m:mo>⊕</m:mo><m:msub><m:mi>I</m:mi><m:mrow><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup><m:mo>-</m:mo><m:msup><m:mi>p</m:mi><m:mrow><m:mi>k</m:mi><m:mo>+</m:mo><m:mn>1</m:mn></m:mrow></m:msup></m:mrow></m:msub><m:mo>)</m:mo></m:mrow></m:mrow></m:mstyle></m:math>
+and can be implemented with <m:math><m:mrow><m:mn>2</m:mn><m:mo>(</m:mo><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo></m:mrow></m:math>
+additions.</para></statement></rule>
+      <para id="id2262249">The following formula gives the decomposition of a circular
+convolution into disjoint non-circular convolutions when
+the number of points is a prime power.</para>
+<!--empty paragraphs get left behind.-->
+      <equation id="uid11"><m:math mode="display">
+          <m:mtable displaystyle="true">
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>R</m:mi>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mi>e</m:mi>
+                    </m:msup>
+                  </m:msub>
+                  <m:mspace width="0.166667em"/>
+                  <m:msub>
+                    <m:mi>S</m:mi>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mi>e</m:mi>
+                    </m:msup>
+                  </m:msub>
+                  <m:mspace width="0.166667em"/>
+                  <m:msubsup>
+                    <m:mi>R</m:mi>
+                    <m:mrow>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>e</m:mi>
+                      </m:msup>
+                    </m:mrow>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msubsup>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mfenced open="[" close="]">
+                  <m:mtable>
+                    <m:mtr>
+                      <m:mtd>
+                        <m:mn>1</m:mn>
+                      </m:mtd>
+                      <m:mtd/>
+                      <m:mtd/>
+                      <m:mtd/>
+                        </m:mtr>
+<m:mtr>
+
+                      <m:mtd/>
+                      <m:mtd>
+                        <m:msub>
+                          <m:mi>C</m:mi>
+                          <m:msub>
+                            <m:mi>Φ</m:mi>
+                            <m:mi>p</m:mi>
+                          </m:msub>
+                        </m:msub>
+                      </m:mtd>
+                      <m:mtd/>
+                      <m:mtd/>
+                        </m:mtr>
+<m:mtr>
+                      <m:mtd/>
+                      <m:mtd/>
+                      <m:mtd>
+                        <m:mo>⋱</m:mo>
+                      </m:mtd>
+                      <m:mtd/>
+                        </m:mtr>
+<m:mtr>
+                      <m:mtd/>
+                      <m:mtd/>
+                      <m:mtd/>
+                      <m:mtd>
+                        <m:msub>
+                          <m:mi>C</m:mi>
+                          <m:msub>
+                            <m:mi>Φ</m:mi>
+                            <m:msup>
+                              <m:mi>p</m:mi>
+                              <m:mi>e</m:mi>
+                            </m:msup>
+                          </m:msub>
+                        </m:msub>
+                      </m:mtd>
+                    </m:mtr>
+                  </m:mtable>
+                </m:mfenced>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:munderover>
+                   <m:mo>⊕</m:mo>
+                    <m:mrow>
+                      <m:mi>i</m:mi>
+                      <m:mo>=</m:mo>
+                      <m:mn>0</m:mn>
+                    </m:mrow>
+                    <m:mi>e</m:mi>
+                  </m:munderover>
+                  <m:msub>
+                    <m:mi>C</m:mi>
+                    <m:msub>
+                      <m:mi>Φ</m:mi>
+                      <m:msup>
+                        <m:mi>p</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msup>
+                    </m:msub>
+                  </m:msub>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </equation>
+<!--empty paragraphs get left behind.-->
+      
+      
+      
+      
+<!--empty paragraphs get left behind.-->
+      <example id="element-291"><equation id="id2262474"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mn>9</m:mn>
+            </m:msub>
+            <m:mspace width="0.166667em"/>
+            <m:msub>
+              <m:mi>S</m:mi>
+              <m:mn>9</m:mn>
+            </m:msub>
+            <m:mspace width="0.166667em"/>
+            <m:msubsup>
+              <m:mi>R</m:mi>
+              <m:mrow>
+                <m:mn>9</m:mn>
+              </m:mrow>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msubsup>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation></example><para id="id2262581">It turns out that when <m:math><m:mi>n</m:mi></m:math> is not a prime power,
+the reduction of polynomials modulo the cyclotomic polynomial
+<m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>n</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math> becomes complicated,
+and with an increasing number of prime factors, the complication increases.
+Recall, however, that a circular convolution of length
+<m:math><m:mrow><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>⋯</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:math> can be converted (by an appropriate
+permutation) into a <m:math><m:mi>k</m:mi></m:math> dimensional circular convolution
+of length <m:math><m:msubsup><m:mi>p</m:mi><m:mi>i</m:mi><m:msub><m:mi>e</m:mi><m:mi>i</m:mi></m:msub></m:msubsup></m:math> along dimension <m:math><m:mi>i</m:mi></m:math>.
+By employing this one-dimensional to multi-dimensional
+mapping technique, one can avoid having to perform
+polynomial reductions modulo <m:math><m:mrow><m:msub><m:mi>Φ</m:mi><m:mi>n</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mi>s</m:mi><m:mo>)</m:mo></m:mrow></m:mrow></m:math>
+for non-prime-power <m:math><m:mi>n</m:mi></m:math>.</para>
+      <para id="id2262742">The prime factor permutation discussed previously
+is the permutation that converts a one-dimensional circular
+convolution into a multi-dimensional one.
+Again, we can use the Kronecker product to
+represent this.
+In this case,
+the reduction operations are applied to each matrix in the
+following way:</para>
+      <equation id="uid12">
+        <m:math mode="display">
+          <m:mrow>
+            <m:mi>T</m:mi>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mn>1</m:mn>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:msubsup>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:mo>⋯</m:mo>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mi>k</m:mi>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msub>
+                </m:msubsup>
+              </m:msub>
+            </m:mfenced>
+            <m:msup>
+              <m:mi>T</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msubsup>
+                <m:mo>⊕</m:mo>
+                <m:mrow>
+                  <m:mi>i</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msubsup>
+              <m:msub>
+                <m:mi>C</m:mi>
+                <m:msub>
+                  <m:mi>Φ</m:mi>
+                  <m:msubsup>
+                    <m:mi>p</m:mi>
+                    <m:mn>1</m:mn>
+                    <m:mi>i</m:mi>
+                  </m:msubsup>
+                </m:msub>
+              </m:msub>
+            </m:mfenced>
+            <m:mo>⊗</m:mo>
+            <m:mo>⋯</m:mo>
+            <m:mo>⊗</m:mo>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msubsup>
+                <m:mo>⊕</m:mo>
+                <m:mrow>
+                  <m:mi>i</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mi>k</m:mi>
+                </m:msub>
+              </m:msubsup>
+              <m:msub>
+                <m:mi>C</m:mi>
+                <m:msub>
+                  <m:mi>Φ</m:mi>
+                  <m:msubsup>
+                    <m:mi>p</m:mi>
+                    <m:mi>k</m:mi>
+                    <m:mi>i</m:mi>
+                  </m:msubsup>
+                </m:msub>
+              </m:msub>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2262942">where</para>
+      <equation id="id2262947">
+        <m:math mode="display">
+          <m:mrow>
+            <m:mi>T</m:mi>
+            <m:mo>=</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:msubsup>
+                <m:mi>p</m:mi>
+                <m:mn>1</m:mn>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msubsup>
+            </m:msub>
+            <m:mo>⊗</m:mo>
+            <m:mo>⋯</m:mo>
+            <m:mo>⊗</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:msubsup>
+                <m:mi>p</m:mi>
+                <m:mi>k</m:mi>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mi>k</m:mi>
+                </m:msub>
+              </m:msubsup>
+            </m:msub>
+          </m:mrow>
+        </m:math>
+      </equation>
+      
+      
+      
+      <example id="element-737"><equation id="uid13"><m:math mode="display">
+          <m:mrow>
+            <m:mi>T</m:mi>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:mn>9</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:mn>5</m:mn>
+              </m:msub>
+            </m:mfenced>
+            <m:msup>
+              <m:mi>T</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+<m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>⊗</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+</m:mtr>
+                    <m:mtr>
+
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation><para id="element-563">where <m:math><m:mrow><m:mi>T</m:mi><m:mo>=</m:mo><m:msub><m:mi>R</m:mi><m:mn>9</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>R</m:mi><m:mn>5</m:mn></m:msub></m:mrow></m:math>.</para></example>
+      
+<!--empty paragraphs get left behind.-->
+      <para id="id2263207">The matrix <m:math><m:mrow><m:msub><m:mi>R</m:mi><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>R</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:msub></m:mrow></m:math>
+can be factored using a property of the Kronecker product.
+Notice that <m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>⊗</m:mo><m:mi>B</m:mi><m:mo>)</m:mo><m:mo>=</m:mo><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>⊗</m:mo><m:mi>I</m:mi><m:mo>)</m:mo><m:mo>(</m:mo><m:mi>I</m:mi><m:mo>⊗</m:mo><m:mi>B</m:mi><m:mo>)</m:mo></m:mrow></m:math>,
+and <m:math><m:mrow><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>⊗</m:mo><m:mi>B</m:mi><m:mo>⊗</m:mo><m:mi>C</m:mi><m:mo>)</m:mo><m:mo>=</m:mo><m:mo>(</m:mo><m:mi>A</m:mi><m:mo>⊗</m:mo><m:mi>I</m:mi><m:mo>)</m:mo><m:mo>(</m:mo><m:mi>I</m:mi><m:mo>⊗</m:mo><m:mi>B</m:mi><m:mo>⊗</m:mo><m:mi>I</m:mi><m:mo>)</m:mo><m:mo>(</m:mo><m:mi>I</m:mi><m:mo>⊗</m:mo><m:mi>C</m:mi><m:mo>)</m:mo></m:mrow></m:math>
+(with appropriate dimensions) so that one gets</para>
+      <equation id="uid14"><m:math mode="display">
+          <m:mrow>
+            <m:munderover>
+               <m:mo>⊗</m:mo>
+              <m:mrow>
+                <m:mi>i</m:mi>
+                <m:mo>=</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+              <m:mi>k</m:mi>
+            </m:munderover>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:msubsup>
+                <m:mi>p</m:mi>
+                <m:mi>i</m:mi>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mi>i</m:mi>
+                </m:msub>
+              </m:msubsup>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:munderover>
+<m:mrow>
+              <m:mo>∏</m:mo>
+</m:mrow>        
+      <m:mrow>
+                <m:mi>i</m:mi>
+                <m:mo>=</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+              <m:mi>k</m:mi>
+            </m:munderover>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:msub>
+                  <m:mi>m</m:mi>
+                  <m:mi>i</m:mi>
+                </m:msub>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mi>i</m:mi>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mi>i</m:mi>
+                  </m:msub>
+                </m:msubsup>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:msub>
+                  <m:mi>n</m:mi>
+                  <m:mi>i</m:mi>
+                </m:msub>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>,</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2263504">where <m:math><m:mrow><m:msub><m:mi>m</m:mi><m:mi>i</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mo>∏</m:mo><m:mrow><m:mi>j</m:mi><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow><m:mrow><m:mi>i</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:msub><m:mi>e</m:mi><m:mi>j</m:mi></m:msub></m:msubsup></m:mrow></m:math>,
+<m:math><m:mrow><m:msub><m:mi>n</m:mi><m:mi>i</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mo>∏</m:mo><m:mrow><m:mi>j</m:mi><m:mo>=</m:mo><m:mi>i</m:mi><m:mo>+</m:mo><m:mn>1</m:mn></m:mrow><m:mi>k</m:mi></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:msub><m:mi>e</m:mi><m:mi>j</m:mi></m:msub></m:msubsup></m:mrow></m:math>
+and where the empty product is taken to be 1.
+This factorization shows that <m:math><m:mi>T</m:mi></m:math> can be implemented basically
+by implementing copies of <m:math><m:msub><m:mi>R</m:mi><m:msup><m:mi>p</m:mi><m:mi>e</m:mi></m:msup></m:msub></m:math>.
+There are many variations on this factorization
+as explained in <link target-id="bid6"/>.
+That the various factorization can be interpreted as vector
+or parallel implementations is also explained in
+<link target-id="bid6"/>.</para>
+      
+      
+      
+      <example id="element-282"><equation id="id2263686">
+        <m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mn>9</m:mn>
+            </m:msub>
+            <m:mo>⊗</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mn>5</m:mn>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>9</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>5</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>9</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>5</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+          </m:mrow>
+        </m:math>
+      </equation>
+<para id="element-333">
+and
+</para>
+<equation id="id2263766">
+
+        <m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mn>9</m:mn>
+            </m:msub>
+            <m:mo>⊗</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mn>25</m:mn>
+            </m:msub>
+            <m:mo>⊗</m:mo>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mn>7</m:mn>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>9</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>175</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>9</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>25</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>7</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:mn>225</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:mn>7</m:mn>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+          </m:mrow>
+        </m:math>
+      </equation></example>
+      
+      
+<!--empty paragraphs get left behind.-->
+      <para id="id2263898">When this factored form of <m:math><m:mrow><m:mo>⊗</m:mo><m:msub><m:mi>R</m:mi><m:msub><m:mi>n</m:mi><m:mi>i</m:mi></m:msub></m:msub></m:mrow></m:math>
+or any of the variations alluded to above,
+is used, the number of additions incurred is given by</para>
+      <equation id="uid15">
+        <m:math mode="display">
+          <m:mtable displaystyle="true">
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mrow>
+                  <m:munderover>
+                    <m:mo>∑</m:mo>
+                    <m:mrow>
+                      <m:mi>i</m:mi>
+                      <m:mo>=</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                    <m:mi>k</m:mi>
+                  </m:munderover>
+                  <m:mfrac>
+                    <m:mi>N</m:mi>
+                    <m:msubsup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                      <m:msub>
+                        <m:mi>e</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msub>
+                    </m:msubsup>
+                  </m:mfrac>
+                  <m:mi mathvariant="script">A</m:mi>
+                  <m:mrow>
+                    <m:mo>(</m:mo>
+                    <m:msub>
+                      <m:mi>R</m:mi>
+                      <m:msubsup>
+                        <m:mi>p</m:mi>
+                        <m:mi>i</m:mi>
+                        <m:msub>
+                          <m:mi>e</m:mi>
+                          <m:mi>i</m:mi>
+                        </m:msub>
+                      </m:msubsup>
+                    </m:msub>
+                    <m:mo>)</m:mo>
+                  </m:mrow>
+                </m:mrow>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:munderover>
+                    <m:mo>∑</m:mo>
+                    <m:mrow>
+                      <m:mi>i</m:mi>
+                      <m:mo>=</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                    <m:mi>k</m:mi>
+                  </m:munderover>
+                  <m:mfrac>
+                    <m:mi>N</m:mi>
+                    <m:msubsup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                      <m:msub>
+                        <m:mi>e</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msub>
+                    </m:msubsup>
+                  </m:mfrac>
+                  <m:mn>2</m:mn>
+                  <m:mrow>
+                    <m:mo>(</m:mo>
+                    <m:msubsup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                      <m:msub>
+                        <m:mi>e</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msub>
+                    </m:msubsup>
+                    <m:mo>-</m:mo>
+                    <m:mn>1</m:mn>
+                    <m:mo>)</m:mo>
+                  </m:mrow>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:mn>2</m:mn>
+                  <m:mi>N</m:mi>
+                  <m:munderover>
+                    <m:mo>∑</m:mo>
+                    <m:mrow>
+                      <m:mi>i</m:mi>
+                      <m:mo>=</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                    <m:mi>k</m:mi>
+                  </m:munderover>
+                  <m:mn>1</m:mn>
+                  <m:mo>-</m:mo>
+                  <m:mfrac>
+                    <m:mn>1</m:mn>
+                    <m:msubsup>
+                      <m:mi>p</m:mi>
+                      <m:mi>i</m:mi>
+                      <m:msub>
+                        <m:mi>e</m:mi>
+                        <m:mi>i</m:mi>
+                      </m:msub>
+                    </m:msubsup>
+                  </m:mfrac>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:mn>2</m:mn>
+                  <m:mi>N</m:mi>
+                  <m:mfenced separators="" open="(" close=")">
+                    <m:mi>k</m:mi>
+                    <m:mo>-</m:mo>
+                    <m:munderover>
+                      <m:mo>∑</m:mo>
+                      <m:mrow>
+                        <m:mi>i</m:mi>
+                        <m:mo>=</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                      <m:mi>k</m:mi>
+                    </m:munderover>
+                    <m:mfrac>
+                      <m:mn>1</m:mn>
+                      <m:msubsup>
+                        <m:mi>p</m:mi>
+                        <m:mi>i</m:mi>
+                        <m:msub>
+                          <m:mi>e</m:mi>
+                          <m:mi>i</m:mi>
+                        </m:msub>
+                      </m:msubsup>
+                    </m:mfrac>
+                  </m:mfenced>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </equation>
+      <para id="id2264205">where <m:math><m:mrow><m:mi>N</m:mi><m:mo>=</m:mo><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>⋯</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:math>.</para>
+      <para id="id2264258">Although the use of operations of the form
+<m:math><m:mrow><m:msub><m:mi>R</m:mi><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup></m:msub><m:mo>⊗</m:mo><m:mo>⋯</m:mo><m:mo>⊗</m:mo><m:msub><m:mi>R</m:mi><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:msub></m:mrow></m:math>
+is simple, it does not exactly separate the circular convolution
+into smaller disjoint convolutions.
+In other words, its use does not give rise in
+<link target-id="uid12"/> and <link target-id="uid13"/> to
+block diagonal matrices whose diagonal
+blocks are the form <m:math><m:mrow><m:msub><m:mo>⊗</m:mo><m:mi>i</m:mi></m:msub><m:msub><m:mi>C</m:mi><m:msub><m:mi>Φ</m:mi><m:msub><m:mi>p</m:mi><m:mi>i</m:mi></m:msub></m:msub></m:msub></m:mrow></m:math>.
+However, by reorganizing the arrangement of the
+operations we can obtain the block diagonal
+form we seek.</para>
+      <para id="id2264368">First, suppose <m:math><m:mi>A</m:mi></m:math>, <m:math><m:mi>B</m:mi></m:math> and <m:math><m:mi>C</m:mi></m:math> are matrices of sizes
+<m:math><m:mrow><m:mi>a</m:mi><m:mo>×</m:mo><m:mi>a</m:mi></m:mrow></m:math>, <m:math><m:mrow><m:mi>b</m:mi><m:mo>×</m:mo><m:mi>b</m:mi></m:mrow></m:math> and <m:math><m:mrow><m:mi>c</m:mi><m:mo>×</m:mo><m:mi>c</m:mi></m:mrow></m:math>
+respectively.
+If</para>
+      <equation id="id2264442"><m:math mode="display">
+          <m:mrow>
+            <m:mi>T</m:mi>
+            <m:mi>B</m:mi>
+            <m:msup>
+              <m:mi>T</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2264496">where <m:math><m:msub><m:mi>B</m:mi><m:mn>1</m:mn></m:msub></m:math> and <m:math><m:msub><m:mi>B</m:mi><m:mn>2</m:mn></m:msub></m:math> are
+matrices of sizes <m:math><m:mrow><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub><m:mo>×</m:mo><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub></m:mrow></m:math> and
+<m:math><m:mrow><m:msub><m:mi>b</m:mi><m:mn>2</m:mn></m:msub><m:mo>×</m:mo><m:msub><m:mi>b</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math>,
+then</para>
+      <equation id="id2264581"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Q</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>A</m:mi>
+              <m:mo>⊗</m:mo>
+              <m:mi>B</m:mi>
+              <m:mo>⊗</m:mo>
+              <m:mi>C</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:msup>
+              <m:mi>Q</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:mi>A</m:mi>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mi>C</m:mi>
+                    
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                    
+                  
+                  <m:mtd>
+                    
+                      <m:mi>A</m:mi>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mi>C</m:mi>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2264670">where</para>
+      <equation id="uid16"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Q</m:mi>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mi>a</m:mi>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mi>T</m:mi>
+                      <m:mrow>
+                        <m:mo>(</m:mo>
+                        <m:mn>1</m:mn>
+                        <m:mo>:</m:mo>
+                        <m:msub>
+                          <m:mi>b</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                        <m:mo>,</m:mo>
+                        <m:mo>:</m:mo>
+                        <m:mo>)</m:mo>
+                      </m:mrow>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mi>c</m:mi>
+                      </m:msub>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mi>a</m:mi>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mi>T</m:mi>
+                      <m:mrow>
+                        <m:mo>(</m:mo>
+                        <m:msub>
+                          <m:mi>b</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                        <m:mo>+</m:mo>
+                        <m:mn>1</m:mn>
+                        <m:mo>:</m:mo>
+                        <m:mi>b</m:mi>
+                        <m:mo>,</m:mo>
+                        <m:mo>:</m:mo>
+                        <m:mo>)</m:mo>
+                      </m:mrow>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mi>c</m:mi>
+                      </m:msub>
+                                      </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2264794">Here <m:math><m:mrow><m:mi>T</m:mi><m:mo>(</m:mo><m:mn>1</m:mn><m:mo>:</m:mo><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub><m:mo>,</m:mo><m:mo>:</m:mo><m:mo>)</m:mo></m:mrow></m:math> denotes the first <m:math><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub></m:math> rows
+and all the columns of <m:math><m:mi>T</m:mi></m:math> and similarly for
+<m:math><m:mrow><m:mi>T</m:mi><m:mo>(</m:mo><m:msub><m:mi>b</m:mi><m:mn>1</m:mn></m:msub><m:mo>+</m:mo><m:mn>1</m:mn><m:mo>:</m:mo><m:mi>b</m:mi><m:mo>,</m:mo><m:mo>:</m:mo><m:mo>)</m:mo></m:mrow></m:math>.
+Note that</para>
+      <equation id="id2264890"><m:math mode="display">
+          <m:mrow>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mi>A</m:mi>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mi>C</m:mi>
+                    </m:mrow>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mi>A</m:mi>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>B</m:mi>
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:mi>C</m:mi>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>≠</m:mo>
+            <m:mi>A</m:mi>
+            <m:mo>⊗</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>B</m:mi>
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>⊗</m:mo>
+            <m:mi>C</m:mi>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2264986">That these two expressions are not equal explains why
+the arrangement of operations must be reorganized
+in order to obtain the desired block diagonal form.
+The appropriate reorganization is described by the
+expression in <link target-id="uid16"/>.
+Therefore, we must modify the transformation of
+<link target-id="uid12"/> appropriately.
+It should be noted that this reorganization of
+operations does not change their computational cost.
+It is still given by <link target-id="uid15"/>.</para>
+      <para id="id2265012">For example, we can use this observation
+and the expression in <link target-id="uid16"/> to arrive at the following
+similarity transformation:</para>
+      <equation id="id2265022"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Q</m:mi>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msub>
+                  <m:mi>p</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msub>
+                  <m:mi>p</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:msub>
+            </m:mfenced>
+            <m:msup>
+              <m:mi>Q</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:msub>
+                          <m:mi>p</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:msub>
+                          <m:mi>p</m:mi>
+                          <m:mn>2</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:msub>
+                            <m:mi>p</m:mi>
+                            <m:mn>1</m:mn>
+                          </m:msub>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:msub>
+                            <m:mi>p</m:mi>
+                            <m:mn>2</m:mn>
+                          </m:msub>
+                        </m:msub>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2265186">where</para>
+      <equation id="id2265191"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Q</m:mi>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                                          <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:msub>
+                          <m:mi>p</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msubsup>                      
+                       <m:mn>1</m:mn>
+                        
+                                                <m:mrow>
+                          <m:msub>
+                            <m:mi>-p</m:mi>
+                            <m:mn>2</m:mn>
+                          </m:msub>
+                        </m:mrow>
+<m:mrow>
+                        <m:mi>t</m:mi>
+</m:mrow>        
+              </m:msubsup>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:msub>
+                          <m:mi>p</m:mi>
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>G</m:mi>
+                        <m:msub>
+                          <m:mi>p</m:mi>
+                          <m:mn>2</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>R</m:mi>
+                <m:msub>
+                  <m:mi>p</m:mi>
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>I</m:mi>
+                <m:msub>
+                  <m:mi>p</m:mi>
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:msub>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2265315"><m:math>
+<m:msub>
+<m:mn>1</m:mn>
+<m:mi>-p</m:mi>
+</m:msub>
+</m:math>
+ is a column vector of <m:math><m:mi>p</m:mi></m:math> 1's</para>
+      <equation id="uid17"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mn>1</m:mn>
+<m:mi>-p</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:msup>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mo>⋯</m:mo>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+              <m:mi>t</m:mi>
+            </m:msup>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2265399">and <m:math><m:msub><m:mi>G</m:mi><m:mi>p</m:mi></m:msub></m:math> is the <m:math><m:mrow><m:mo>(</m:mo><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn><m:mo>)</m:mo><m:mo>×</m:mo><m:mi>p</m:mi></m:mrow></m:math> matrix:</para>
+      <equation id="uid18"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>G</m:mi>
+              <m:mi>p</m:mi>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋱</m:mo>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mo>⋮</m:mo>
+                  </m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mrow>
+                          <m:mi>p</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msub>
+                      <m:mo>-</m:mo>
+                      <m:msub>
+                        <m:munder>
+                          <m:mn>1</m:mn>
+                          <m:mo>̲</m:mo>
+                        </m:munder>
+                        <m:mrow>
+                          <m:mi>p</m:mi>
+                          <m:mo>-</m:mo>
+                          <m:mn>1</m:mn>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2265563">In general we have</para>
+      <equation id="uid19"><m:math mode="display">
+          <m:mrow>
+            <m:mi>R</m:mi>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mn>1</m:mn>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:msubsup>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:mo>⋯</m:mo>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mi>k</m:mi>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msub>
+                </m:msubsup>
+              </m:msub>
+            </m:mfenced>
+            <m:msup>
+              <m:mi>R</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:munder>
+              <m:mo>⊕</m:mo>
+              <m:mrow>
+                <m:mi>d</m:mi>
+                <m:mo>|</m:mo>
+                <m:mi>n</m:mi>
+              </m:mrow>
+            </m:munder>
+            <m:mi>Ψ</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>d</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2265674">where <m:math><m:mrow><m:mi>R</m:mi><m:mo>=</m:mo><m:msub><m:mi>R</m:mi><m:mrow><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:msub></m:mrow></m:math> is given by</para>
+      <equation id="uid20"><m:math mode="display">
+          <m:mrow>
+            <m:msub>
+              <m:mi>R</m:mi>
+              <m:mrow>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mn>1</m:mn>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:msubsup>
+                <m:mo>,</m:mo>
+                <m:mo>⋯</m:mo>
+                <m:mo>,</m:mo>
+                <m:msubsup>
+                  <m:mi>p</m:mi>
+                  <m:mi>k</m:mi>
+                  <m:msub>
+                    <m:mi>e</m:mi>
+                    <m:mi>k</m:mi>
+                  </m:msub>
+                </m:msubsup>
+              </m:mrow>
+            </m:msub>
+            <m:mo>=</m:mo>
+            <m:munderover>
+<m:mrow>
+              <m:mo>∏</m:mo>
+</m:mrow>        
+      <m:mrow>
+                <m:mi>i</m:mi>
+                <m:mo>=</m:mo>
+                <m:mi>k</m:mi>
+              </m:mrow>
+              <m:mn>1</m:mn>
+            </m:munderover>
+            <m:mi>Q</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:msub>
+                <m:mi>m</m:mi>
+                <m:mi>i</m:mi>
+              </m:msub>
+              <m:mo>,</m:mo>
+              <m:msubsup>
+                <m:mi>p</m:mi>
+                <m:mi>i</m:mi>
+                <m:msub>
+                  <m:mi>e</m:mi>
+                  <m:mi>i</m:mi>
+                </m:msub>
+              </m:msubsup>
+              <m:mo>,</m:mo>
+              <m:msub>
+                <m:mi>n</m:mi>
+                <m:mi>i</m:mi>
+              </m:msub>
+              <m:mo>)</m:mo>
+            </m:mrow>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2265855">with <m:math><m:mrow><m:msub><m:mi>m</m:mi><m:mi>i</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mo>∏</m:mo><m:mrow><m:mi>j</m:mi><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow><m:mrow><m:mi>i</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:msub><m:mi>e</m:mi><m:mi>j</m:mi></m:msub></m:msubsup></m:mrow></m:math>,
+<m:math><m:mrow><m:msub><m:mi>n</m:mi><m:mi>i</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mo>∏</m:mo><m:mrow><m:mi>j</m:mi><m:mo>=</m:mo><m:mi>i</m:mi><m:mo>+</m:mo><m:mn>1</m:mn></m:mrow><m:mi>k</m:mi></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:msub><m:mi>e</m:mi><m:mi>j</m:mi></m:msub></m:msubsup></m:mrow></m:math>
+and</para>
+      <equation id="uid21"><m:math mode="display">
+          <m:mrow>
+            <m:mi>Q</m:mi>
+            <m:mrow>
+              <m:mo>(</m:mo>
+              <m:mi>a</m:mi>
+              <m:mo>,</m:mo>
+              <m:msup>
+                <m:mi>p</m:mi>
+                <m:mi>e</m:mi>
+              </m:msup>
+              <m:mo>,</m:mo>
+              <m:mi>c</m:mi>
+              <m:mo>)</m:mo>
+            </m:mrow>
+            <m:mo>=</m:mo>
+            <m:munderover>
+<m:mrow>
+              <m:mo>∏</m:mo>
+</m:mrow>        
+      <m:mrow>
+                <m:mi>j</m:mi>
+                <m:mo>=</m:mo>
+                <m:mn>0</m:mn>
+              </m:mrow>
+              <m:mrow>
+                <m:mi>e</m:mi>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:munderover>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mi>a</m:mi>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msubsup>
+<m:mrow>
+                      <m:mn>1</m:mn>
+</m:mrow>
+                        <m:mrow>
+<m:mo>-</m:mo>                          
+<m:mi>p</m:mi>
+                        </m:mrow>
+<m:mrow>
+                        <m:mi>t</m:mi>
+</m:mrow>        
+              </m:msubsup>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mrow>
+                          <m:mi>c</m:mi>
+                          <m:msup>
+                            <m:mi>p</m:mi>
+                            <m:mi>j</m:mi>
+                          </m:msup>
+                        </m:mrow>
+                      </m:msub>
+                    
+                  </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mi>a</m:mi>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>G</m:mi>
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mrow>
+                          <m:mi>c</m:mi>
+                          <m:msup>
+                            <m:mi>p</m:mi>
+                            <m:mi>j</m:mi>
+                          </m:msup>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                    
+                  
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>I</m:mi>
+                      <m:mrow>
+                        <m:mi>a</m:mi>
+                        <m:mi>c</m:mi>
+                        <m:mo>(</m:mo>
+                        <m:msup>
+                          <m:mi>p</m:mi>
+                          <m:mi>e</m:mi>
+                        </m:msup>
+                        <m:mo>-</m:mo>
+                        <m:msup>
+                          <m:mi>p</m:mi>
+                          <m:mrow>
+                            <m:mi>j</m:mi>
+                            <m:mo>+</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                        </m:msup>
+                        <m:mo>)</m:mo>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+            <m:mo>.</m:mo>
+          </m:mrow>
+        </m:math>
+      </equation>
+      <para id="id2266164"><m:math>
+<m:msub>
+<m:mn>1</m:mn>
+<m:mi>-p</m:mi>
+</m:msub>
+</m:math> 
+and 
+<m:math>
+<m:msub>
+<m:mi>G</m:mi>
+<m:mi>p</m:mi>
+</m:msub>
+</m:math> 
+are as given in
+<link target-id="uid17"/> and <link target-id="uid18"/>.</para>
+      
+      
+      
+      <example id="element-135"><para id="element-2342352352">
+<equation id="uid22"><m:math mode="display">
+          <m:mrow>
+            <m:mi>R</m:mi>
+            <m:mfenced separators="" open="(" close=")">
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:mn>9</m:mn>
+              </m:msub>
+              <m:mo>⊗</m:mo>
+              <m:msub>
+                <m:mi>S</m:mi>
+                <m:mn>5</m:mn>
+              </m:msub>
+            </m:mfenced>
+            <m:msup>
+              <m:mi>R</m:mi>
+              <m:mrow>
+                <m:mo>-</m:mo>
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+            <m:mo>=</m:mo>
+            <m:mfenced open="[" close="]">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:mn>1</m:mn>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>3</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>9</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>C</m:mi>
+                      <m:msub>
+                        <m:mi>Φ</m:mi>
+                        <m:mn>5</m:mn>
+                      </m:msub>
+                    </m:msub>
+                  </m:mtd>
+                  <m:mtd/>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>3</m:mn>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>5</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                  <m:mtd/>
+                    </m:mtr>
+<m:mtr>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd/>
+                  <m:mtd>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>9</m:mn>
+                        </m:msub>
+                      </m:msub>
+                      <m:mo>⊗</m:mo>
+                      <m:msub>
+                        <m:mi>C</m:mi>
+                        <m:msub>
+                          <m:mi>Φ</m:mi>
+                          <m:mn>5</m:mn>
+                        </m:msub>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+            </m:mfenced>
+          </m:mrow>
+        </m:math>
+      </equation>
+
+
+where
+
+<equation id="id2266437">
+
+        <m:math mode="display">
+          <m:mtable displaystyle="true">
+            <m:mtr>
+              <m:mtd columnalign="right">
+                <m:mi>R</m:mi>
+              </m:mtd>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:msub>
+                  <m:mi>R</m:mi>
+                  <m:mrow>
+                    <m:mn>9</m:mn>
+                    <m:mo>,</m:mo>
+                    <m:mn>5</m:mn>
+                  </m:mrow>
+                </m:msub>
+              </m:mtd>
+            </m:mtr>
+            <m:mtr>
+              <m:mtd/>
+              <m:mtd>
+                <m:mo>=</m:mo>
+              </m:mtd>
+              <m:mtd columnalign="left">
+                <m:mrow>
+                  <m:mi>Q</m:mi>
+                  <m:mo>(</m:mo>
+                  <m:mn>9</m:mn>
+                  <m:mo>,</m:mo>
+                  <m:mn>5</m:mn>
+                  <m:mo>,</m:mo>
+                  <m:mn>1</m:mn>
+                  <m:mo>)</m:mo>
+                  <m:mi>Q</m:mi>
+                  <m:mo>(</m:mo>
+                  <m:mn>1</m:mn>
+                  <m:mo>,</m:mo>
+                  <m:mn>9</m:mn>
+                  <m:mo>,</m:mo>
+                  <m:mn>5</m:mn>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </equation>
+and <m:math><m:mi>R</m:mi></m:math> can be implemented
+with 152 additions.</para></example>
+      
+      
+      
+      <para id="id2266543">Notice the distinction between this example and
+example <link target-id="cid3">"Reduction Operations"</link>.
+In example <link target-id="cid3">"Reduction Operations"</link> we obtained from
+<m:math><m:mrow><m:msub><m:mi>S</m:mi><m:mn>9</m:mn></m:msub><m:mo>⊗</m:mo><m:msub><m:mi>S</m:mi><m:mn>5</m:mn></m:msub></m:mrow></m:math> a Kronecker product of two
+block diagonal matrices, but here we obtained
+a block diagonal matrix whose diagonal blocks
+are the Kronecker product of cyclotomic companion
+matrices.
+Each block in <link target-id="uid22"/> represents a multi-dimensional
+cyclotomic convolution.</para>
+      <para id="id2266594">A Matlab program that carries out the operation
+<m:math><m:msub><m:mi>R</m:mi><m:mrow><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:msub></m:math>
+in <link target-id="uid19"/> is <code>KRED()</code>
+.</para>
+      
+      
+      <code id="id10273328" display="block">function x = KRED(P,E,K,x)
+% x = KRED(P,E,K,x);
+% P : P = [P(1),...,P(K)];
+% E : E = [E(K),...,E(K)];
+for i = 1:K
+   a = prod(P(1:i-1).^E(1:i-1));
+   c = prod(P(i+1:K).^E(i+1:K));
+   p = P(i);
+   e = E(i);
+   for j = e-1:-1:0
+      x(1:a*c*(p^(j+1))) = RED(p,a,c*(p^j),x(1:a*c*(p^(j+1))));
+   end
+end
+</code><para id="id2266738">It calls the Matlab program <code>RED()</code>
+.</para>
+      
+      
+<!--empty paragraphs get left behind.-->
+      <code id="id10273362" display="block">function y = RED(p,a,c,x)
+% y = RED(p,a,c,x);
+y = zeros(a*c*p,1);
+for i = 0:c:(a-1)*c
+   for j = 0:c-1
+      y(i+j+1) = x(i*p+j+1);
+      for k = 0:c:c*(p-2)
+         y(i+j+1) = y(i+j+1) + x(i*p+j+k+c+1);
+         y(i*(p-1)+j+k+a*c+1) = x(i*p+j+k+1) - x(i*p+j+c*(p-1)+1);
+      end
+   end
+end
+</code><para id="id2266790">These two Matlab programs are not written to run as fast as
+they could be.
+They are a `naive' coding of <m:math><m:msub><m:mi>R</m:mi><m:mrow><m:msubsup><m:mi>p</m:mi><m:mn>1</m:mn><m:msub><m:mi>e</m:mi><m:mn>1</m:mn></m:msub></m:msubsup><m:mo>,</m:mo><m:mo>⋯</m:mo><m:mo>,</m:mo><m:msubsup><m:mi>p</m:mi><m:mi>k</m:mi><m:msub><m:mi>e</m:mi><m:mi>k</m:mi></m:msub></m:msubsup></m:mrow></m:msub></m:math>
+and are meant to serve as a basis for more efficient programs.
+In particular, the indexing and the loop counters can
+be modified to improve the efficiency.
+However, the modifications that minimize the overhead
+incurred by indexing operations depends on the
+programming language, the compiler and the computer used.
+These two programs are written with simple
+loop counters and complicated indexing operations
+so that appropriate modifications can be easily made.</para>
+      <section id="uid23">
+        <title>Inverses</title>
+        <para id="id2266862">The inverse of <m:math><m:msub><m:mi>R</m:mi><m:mi>p</m:mi></m:msub></m:math> has the form</para>
+        <equation id="uid24"><m:math mode="display">
+            <m:mrow>
+              <m:msubsup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mi>p</m:mi>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msubsup>
+              <m:mo>=</m:mo>
+              <m:mfrac>
+                <m:mn>1</m:mn>
+                <m:mi>p</m:mi>
+              </m:mfrac>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mi>p</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                      
+  <m:mn>1</m:mn>
+                      
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mi>p</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                      
+  <m:mn>1</m:mn>
+                      
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mi>p</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                     
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>
+                        <m:mn>1</m:mn>
+                      
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      
+                        <m:mi>p</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+</m:mtd>
+</m:mtr>
+<m:mtr>
+<m:mtd>                      
+  <m:mn>1</m:mn>
+                      
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2267072">and</para>
+        <equation id="id2267077"><m:math mode="display">
+            <m:mrow>
+              <m:msubsup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:msup>
+                    <m:mi>p</m:mi>
+                    <m:mi>e</m:mi>
+                  </m:msup>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msubsup>
+              <m:mo>=</m:mo>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∏</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>k</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>0</m:mn>
+                </m:mrow>
+                <m:mrow>
+                  <m:mi>e</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:munderover>
+              <m:mrow>
+                <m:mo>(</m:mo>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+                  <m:msubsup>
+                    <m:mi>R</m:mi>
+                    <m:mrow>
+                      <m:mi>p</m:mi>
+                    </m:mrow>
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+                      <m:mn>1</m:mn>
+                    </m:mrow>
+                  </m:msubsup>
+                  <m:mo>⊗</m:mo>
+                  <m:msub>
+                    <m:mi>I</m:mi>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mrow>
+                        <m:mi>e</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mn>1</m:mn>
+                        <m:mo>-</m:mo>
+                        <m:mi>k</m:mi>
+                      </m:mrow>
+                    </m:msup>
+                  </m:msub>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+                <m:mo>⊕</m:mo>
+                <m:msub>
+                  <m:mi>I</m:mi>
+                  <m:mrow>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mi>e</m:mi>
+                    </m:msup>
+                    <m:mo>-</m:mo>
+                    <m:msup>
+                      <m:mi>p</m:mi>
+                      <m:mrow>
+                        <m:mi>e</m:mi>
+                        <m:mo>-</m:mo>
+                        <m:mi>k</m:mi>
+                      </m:mrow>
+                    </m:msup>
+                  </m:mrow>
+                </m:msub>
+                <m:mo>)</m:mo>
+              </m:mrow>
+              <m:mo>.</m:mo>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2267215">Because the inverse of <m:math><m:mi>Q</m:mi></m:math> in <link target-id="uid16"/> is given by</para>
+        <equation id="id2267232">
+          <m:math mode="display">
+            <m:mrow>
+              <m:msup>
+                <m:mi>Q</m:mi>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mo>=</m:mo>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mi>a</m:mi>
+                        </m:msub>
+                        <m:mo>⊗</m:mo>
+                        <m:msup>
+                          <m:mi>T</m:mi>
+                          <m:mrow>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                        </m:msup>
+                        <m:mrow>
+                          <m:mo>(</m:mo>
+                          <m:mo>:</m:mo>
+                          <m:mo>,</m:mo>
+                          <m:mn>1</m:mn>
+                          <m:mo>:</m:mo>
+                          <m:msub>
+                            <m:mi>b</m:mi>
+                            <m:mn>1</m:mn>
+                          </m:msub>
+                          <m:mo>)</m:mo>
+                        </m:mrow>
+                        <m:mo>⊗</m:mo>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mi>c</m:mi>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mi>a</m:mi>
+                        </m:msub>
+                        <m:mo>⊗</m:mo>
+                        <m:msup>
+                          <m:mi>T</m:mi>
+                          <m:mrow>
+                            <m:mo>-</m:mo>
+                            <m:mn>1</m:mn>
+                          </m:mrow>
+                        </m:msup>
+                        <m:mrow>
+                          <m:mo>(</m:mo>
+                          <m:mo>:</m:mo>
+                          <m:mo>,</m:mo>
+                          <m:msub>
+                            <m:mi>b</m:mi>
+                            <m:mn>1</m:mn>
+                          </m:msub>
+                          <m:mo>+</m:mo>
+                          <m:mn>1</m:mn>
+                          <m:mo>:</m:mo>
+                          <m:mi>b</m:mi>
+                          <m:mo>)</m:mo>
+                        </m:mrow>
+                        <m:mo>⊗</m:mo>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mi>c</m:mi>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2267374">the inverse of the matrix <m:math><m:mi>R</m:mi></m:math> described by eqs
+<link target-id="uid19"/>, <link target-id="uid20"/> and <link target-id="uid21"/>
+is given by</para>
+        <equation id="uid25"><m:math mode="display">
+            <m:mrow>
+              <m:msup>
+                <m:mi>R</m:mi>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mo>=</m:mo>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∏</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>i</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+<m:mrow>
+                <m:mi>k</m:mi>
+</m:mrow>        
+      </m:munderover>
+              <m:mi>Q</m:mi>
+              <m:msup>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+                  <m:msub>
+                    <m:mi>m</m:mi>
+                    <m:mi>i</m:mi>
+                  </m:msub>
+                  <m:mo>,</m:mo>
+                  <m:msubsup>
+                    <m:mi>p</m:mi>
+                    <m:mi>i</m:mi>
+                    <m:msub>
+                      <m:mi>e</m:mi>
+                      <m:mi>i</m:mi>
+                    </m:msub>
+                  </m:msubsup>
+                  <m:mo>,</m:mo>
+                  <m:msub>
+                    <m:mi>n</m:mi>
+                    <m:mi>i</m:mi>
+                  </m:msub>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2267496">with <m:math><m:mrow><m:msub><m:mi>m</m:mi><m:mi>i</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mo>∏</m:mo><m:mrow><m:mi>j</m:mi><m:mo>=</m:mo><m:mn>1</m:mn></m:mrow><m:mrow><m:mi>i</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:msub><m:mi>e</m:mi><m:mi>j</m:mi></m:msub></m:msubsup></m:mrow></m:math>,
+<m:math><m:mrow><m:msub><m:mi>n</m:mi><m:mi>i</m:mi></m:msub><m:mo>=</m:mo><m:msubsup><m:mo>∏</m:mo><m:mrow><m:mi>j</m:mi><m:mo>=</m:mo><m:mi>i</m:mi><m:mo>+</m:mo><m:mn>1</m:mn></m:mrow><m:mi>k</m:mi></m:msubsup><m:msubsup><m:mi>p</m:mi><m:mi>j</m:mi><m:msub><m:mi>e</m:mi><m:mi>j</m:mi></m:msub></m:msubsup></m:mrow></m:math>
+and</para>
+        <equation id="uid26"><m:math mode="display">
+            <m:mrow>
+              <m:mi>Q</m:mi>
+              <m:msup>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+                  <m:mi>a</m:mi>
+                  <m:mo>,</m:mo>
+                  <m:msup>
+                    <m:mi>p</m:mi>
+                    <m:mi>e</m:mi>
+                  </m:msup>
+                  <m:mo>,</m:mo>
+                  <m:mi>c</m:mi>
+                  <m:mo>)</m:mo>
+                </m:mrow>
+                <m:mrow>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+              </m:msup>
+              <m:mo>=</m:mo>
+              <m:munderover>
+<m:mrow>
+                <m:mo>∏</m:mo>
+</m:mrow>        
+        <m:mrow>
+                  <m:mi>j</m:mi>
+                  <m:mo>=</m:mo>
+                  <m:mi>e</m:mi>
+                  <m:mo>-</m:mo>
+                  <m:mn>1</m:mn>
+                </m:mrow>
+<m:mrow>         
+       <m:mn>0</m:mn>
+</m:mrow>        
+      </m:munderover>
+              <m:mfenced open="[" close="]">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mi>a</m:mi>
+                        </m:msub>
+                        <m:mo>⊗</m:mo>
+                        <m:msubsup>
+<m:mrow>
+                            <m:mn>1</m:mn>
+</m:mrow>
+<m:mrow>        
+                  <m:mi>-p</m:mi>
+</m:mrow>
+<m:mrow>            
+              <m:mi>t</m:mi>
+</m:mrow>        
+                </m:msubsup>
+                        <m:mo>⊗</m:mo>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mrow>
+                            <m:mi>c</m:mi>
+                            <m:msup>
+                              <m:mi>p</m:mi>
+                              <m:mi>j</m:mi>
+                            </m:msup>
+                          </m:mrow>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+                    <m:mtd>
+                      <m:mrow>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mi>a</m:mi>
+                        </m:msub>
+                        <m:mo>⊗</m:mo>
+                        <m:msub>
+                          <m:mi>V</m:mi>
+                          <m:mi>p</m:mi>
+                        </m:msub>
+                        <m:mo>⊗</m:mo>
+                        <m:msub>
+                          <m:mi>I</m:mi>
+                          <m:mrow>
+                            <m:mi>c</m:mi>
+                            <m:msup>
+                              <m:mi>p</m:mi>
+                              <m:mi>j</m:mi>
+                            </m:msup>
+                          </m:mrow>
+                        </m:msub>
+                      </m:mrow>
+                    </m:mtd>
+<m:mtd/>
+</m:mtr>
+<m:mtr>
+                    <m:mtd/>
+                      
+                    
+                    <m:mtd/>
+                    <m:mtd>
+                      <m:msub>
+                        <m:mi>I</m:mi>
+                        <m:mrow>
+                          <m:mi>a</m:mi>
+                          <m:mi>c</m:mi>
+                          <m:mo>(</m:mo>
+                          <m:msup>
+                            <m:mi>p</m:mi>
+                            <m:mi>e</m:mi>
+                          </m:msup>
+                          <m:mo>-</m:mo>
+                          <m:msup>
+                            <m:mi>p</m:mi>
+                            <m:mrow>
+                              <m:mi>j</m:mi>
+                              <m:mo>+</m:mo>
+                              <m:mn>1</m:mn>
+                            </m:mrow>
+                          </m:msup>
+                          <m:mo>)</m:mo>
+                        </m:mrow>
+                      </m:msub>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+              </m:mfenced>
+            </m:mrow>
+          </m:math>
+        </equation>
+        <para id="id2267810">where <m:math><m:msub><m:mi>V</m:mi><m:mi>p</m:mi></m:msub></m:math> denotes the matrix in <link target-id="uid24"/>
+without the first column.
+A Matlab program for <m:math><m:msup><m:mi>R</m:mi><m:mi>t</m:mi></m:msup></m:math> is <code>tKRED()</code>
+,
+it calls the Matlab program <code>tRED()</code>
+.
+A Matlab program for <m:math><m:msup><m:mi>R</m:mi><m:mrow><m:mo>-</m:mo><m:mi>t</m:mi></m:mrow></m:msup></m:math> is <code>itKRED()</code>
+,
+it calls the Matlab program <code>itRED()</code>
+.
+These programs all appear in one of the appendices.</para>
+      </section>
+    </section>
+  </content>
+  <bib:file>
+    <bib:entry id="bid0">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Agarwal, R. C. and Cooley, J. W.</bib:author>
+        <bib:title>New Algorithms for Digital Convolution</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1977</bib:year>
+<!--optional fields-->
+        <bib:volume>25</bib:volume>
+        <bib:number>5</bib:number>
+        <bib:pages>392-410</bib:pages>
+        <bib:month>October</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid2">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Nussbaumer, H. J.</bib:author>
+        <bib:title>Fast Polynomial Transform Algorithms for Digital Convolution</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1980</bib:year>
+<!--optional fields-->
+        <bib:volume>28</bib:volume>
+        <bib:number>2</bib:number>
+        <bib:pages>205-215</bib:pages>
+        <bib:month>April</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid1">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Nussbaumer, H. J.</bib:author>
+        <bib:title>Fast Fourier Transform and Convolution Algorithms</bib:title>
+        <bib:publisher>Sringer-Verlag</bib:publisher>
+        <bib:year>1982</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid6">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Tolimieri, R. and An, M. and Lu, C.</bib:author>
+        <bib:title>Algorithms for Discrete Fourier Transform and Convolution</bib:title>
+        <bib:publisher>Springer-Verlag</bib:publisher>
+        <bib:year>1989</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid4">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Temperton, C.</bib:author>
+        <bib:title>Implementation of a Self-Sorting In-Place Prime Factor FFT Algorithm</bib:title>
+        <bib:journal>Journal of Computational Physics</bib:journal>
+        <bib:year>1985</bib:year>
+<!--optional fields-->
+        <bib:volume>58</bib:volume>
+        <bib:number/>
+        <bib:pages>283-299</bib:pages>
+        <bib:month/>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid5">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Winograd, S.</bib:author>
+        <bib:title>Arithmetic Complexity of Computations</bib:title>
+        <bib:publisher>SIAM</bib:publisher>
+        <bib:year>1980</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid3">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Zalcstein, Y.</bib:author>
+        <bib:title>A Note on Fast Cyclic Convolution</bib:title>
+        <bib:journal>IEEE Trans. Comput.</bib:journal>
+        <bib:year>1971</bib:year>
+<!--optional fields-->
+        <bib:volume>20</bib:volume>
+        <bib:number/>
+        <bib:pages>665-666</bib:pages>
+        <bib:month>June</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+  </bib:file>
+</document>

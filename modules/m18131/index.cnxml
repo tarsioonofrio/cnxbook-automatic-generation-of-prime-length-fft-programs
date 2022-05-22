@@ -1,0 +1,331 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Introduction</title>
+  <metadata>
+  <md:content-id>m18131</md:content-id><md:title>Introduction</md:title>
+  <md:abstract>This collection of modules is from a Rice University, ECE Department Technical Report written around September 1994. It grew out of the doctoral and post doctoral research of Ivan Selesnick working with Prof. C. Sidney Burrus at Rice. Earlier reports on this work were published in the ICASSP and ISCAS conference proceedings in 1992-94 and a fairly complete report was published in the IEEE Transaction on Signal Processing in January 1996.</md:abstract>
+  <md:uuid>a9d39379-9170-49db-bcd7-a5bb027f2462</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Introduction</title>
+      
+      <para id="id2253753">The development of algorithms for
+the fast computation of the Discrete Fourier
+Transform in the last 30 years originated with
+the radix 2 Cooley-Tukey FFT
+and the theory and variety of FFTs has grown significantly since then.
+Most of the work has focused on
+FFTs whose sizes are composite, for the
+algorithms depend on the ability to factor
+the length of the data sequence,
+so that the transform can be found by taking
+the transform of smaller lengths.
+For this reason, algorithms for prime length transforms are
+building blocks for many composite length
+FFTs -
+the maximum length and the variety of lengths
+of a PFA or WFTA algorithm depend upon the
+availability of prime length FFT modules.
+As such, prime length Fast Fourier Transforms
+are a special, important and difficult case.</para>
+      <para id="id2253769">Fast algorithms designed for specific short prime lengths have been developed and
+have been written as straight line code <link target-id="bid4"/>, <link target-id="bid5"/>.
+These dedicated programs rely upon an observation made in Rader's paper <link target-id="bid6"/> in which
+he shows that a prime <m:math><m:mi>p</m:mi></m:math> length DFT can be found by performing a <m:math><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> length circular
+convolution.
+Since the publication of that paper, Winograd had developed a theory of multiplicative
+complexity for transforms and designed algorithms for convolution that attain
+the minimum number of multiplications <link target-id="bid7"/>.
+Although Winograd's algorithms are very efficient for small prime lengths,
+for longer lengths they require a large number of additions
+and the algorithms become very cumbersome to design.
+This has prevented the design of useful prime length FFT programs for lengths greater
+than 31.
+Although we have previously reported the design of programs for prime lengths
+greater than 31 <link target-id="bid0"/> those programs required more additions
+than necessary and were long.
+Like the previously existing ones,
+they simply consisted of a long list of instructions
+and did not take advantage of the attainable common structures.</para>
+      <para id="id2253843">In this paper we describe a set of programs
+for circular convolution and prime length FFTs
+that are are short, possess great structure,
+share many computational procedures,
+and cover a large variety of lengths.
+Because the underlying convolution is decomposed into a
+set of disjoint operations
+they can be performed in parallel
+and this parallelism is made clear in the programs.
+Moreover, each of these independent operations is made up of a sequence
+of sub-operations
+of the form <m:math><m:mrow><m:mi>I</m:mi><m:mo>⊗</m:mo><m:mi>A</m:mi><m:mo>⊗</m:mo><m:mi>I</m:mi></m:mrow></m:math> where
+<m:math><m:mo>⊗</m:mo></m:math> denotes the Kronecker product.
+These operations can be implemented as
+vector/parallel operations <link target-id="bid8"/>.
+Previous programs for prime length FFTs do not
+have these features: they consist of
+straight line code and are not amenable to
+vector/parallel implementations.</para>
+      <para id="id2253892">We have also developed a program that automatically generates
+these programs for circular convolution and prime length DFTs.
+This code generating program requires information only
+about a set of modules for computing cyclotomic convolutions.
+We compute these non-circular convolutions
+by computing a linear convolution and reducing the result.
+Furthermore, because these linear convolution algorithms
+can be built from smaller ones, the only modules
+needed are ones for the linear convolution of prime length sequences.
+It turns out that with linear convolution algorithms for
+only the lengths 2 and 3, we can generate a wide
+variety of prime length FFT algorithms.
+In addition, the code we generate is made up
+of calls to a relatively small set of functions.
+Accordingly, the subroutines can be designed and optimized to
+specifically suit a given architecture.</para>
+      <para id="id2253910">The programs we describe use Rader's conversion of a prime
+point DFT into a circular convolution, but this convolution
+we compute using the split nesting algorithm <link target-id="bid9"/>.
+As Stasinski notes <link target-id="bid10"/>, this yields algorithms
+possessing greater structure and simpler programs and
+doesn't generally require more computation.</para>
+<section id="id868736487234"><title>On the Row-Column Method</title>
+  <para id="id2253935">In computing the DFT of an <m:math><m:mrow><m:mi>n</m:mi><m:mo>=</m:mo><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math> point sequence
+where <m:math><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub></m:math> and <m:math><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:math> are relatively prime,
+a row-column method can be employed.
+That is, if an <m:math><m:mrow><m:msub><m:mi>n</m:mi><m:mn>1</m:mn></m:msub><m:mo>×</m:mo><m:msub><m:mi>n</m:mi><m:mn>2</m:mn></m:msub></m:mrow></m:math> array is appropriately formed
+from the <m:math><m:mi>n</m:mi></m:math> point sequence,
+then its DFT can be computed by computing the DFT
+of the rows and by then computing the DFT of the columns.
+The separability of the DFT makes this possible.
+It should be mentioned, however, that in at least two papers <link target-id="bid10"/>, <link target-id="bid11"/>
+it is mistakenly assumed that the row-column method can also
+be applied to convolution.
+Unfortunately, the convolution of two sequences
+can not be found by forming two arrays, by
+convolving their rows, and by then convolving their columns.
+This misunderstanding about the separability of convolution
+also appears in <link target-id="bid12"/> where the author incorrectly writes
+a diagonal matrix of a bilinear form as a Kronecker product.
+If it were a Kronecker product, then there would indeed exist
+a row-column method for convolution.</para></section><para id="element-397">Earlier reports on this work were published in the conference proceedings <link target-id="bid0"/>, <link target-id="bid1"/>, <link target-id="bid2"/> and a fairly complete
+report was published in the IEEE Transaction on Signal Processing <link target-id="bid3"/>.  Some parts of this approach appear in the Connexions book, <link document="col10550/latest/">Fast Fourier Transforms</link>.  This work is built on and an extension of that in <link target-id="bid2"/> which is also in the Connexions <link document="col10569/latest/">Technical Report</link>.</para>
+      
+    </section>
+  </content>
+  <bib:file>
+    <bib:entry id="bid12">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Blahut, R. E.</bib:author>
+        <bib:title>Fast Algorithms for Digital Signal Processing</bib:title>
+        <bib:publisher>Addison-Wesley</bib:publisher>
+        <bib:year>1985</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid5">
+      <bib:techreport>
+<!--required fields-->
+        <bib:author>Johnson, H. W. and Burrus, S.</bib:author>
+        <bib:title>Large DFT Modules: 11, 13, 17, 19, 25</bib:title>
+        <bib:institution>Rice University</bib:institution>
+        <bib:year>1981</bib:year>
+<!--optional fields-->
+        <bib:type>Technical report</bib:type>
+        <bib:number>8105</bib:number>
+        <bib:address/>
+        <bib:month/>
+        <bib:note>
+           Connexions Collection: col10569
+        </bib:note>
+      </bib:techreport>
+    </bib:entry>
+    <bib:entry id="bid4">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Johnson, H. W. and Burrus, C. S.</bib:author>
+        <bib:title>The Design of Optimal DFT Algorithms Using Dynamic Programming</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1983</bib:year>
+<!--optional fields-->
+        <bib:volume>31</bib:volume>
+        <bib:number>2</bib:number>
+        <bib:pages>378-387</bib:pages>
+        <bib:month>April</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid11">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Lu, C. and Cooley, J. W. and Tolimieri, R.</bib:author>
+        <bib:title>FFT Algorithms for Prime Transform Sizes and their Implementations of VAX, IBM3090VF, and IBM RS/6000</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1993</bib:year>
+<!--optional fields-->
+        <bib:volume>41</bib:volume>
+        <bib:number>2</bib:number>
+        <bib:pages>638-648</bib:pages>
+        <bib:month>February</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid9">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Nussbaumer, H. J.</bib:author>
+        <bib:title>Fast Fourier Transform and Convolution Algorithms</bib:title>
+        <bib:publisher>Sringer-Verlag</bib:publisher>
+        <bib:year>1982</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid6">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Rader, C. M.</bib:author>
+        <bib:title>Discrete Fourier Transform When the Number of Data Samples is Prime</bib:title>
+        <bib:journal>Proc. IEEE</bib:journal>
+        <bib:year>1968</bib:year>
+<!--optional fields-->
+        <bib:volume>56</bib:volume>
+        <bib:number>6</bib:number>
+        <bib:pages>1107-1108</bib:pages>
+        <bib:month>June</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid0">
+      <bib:inproceedings>
+<!--required fields-->
+        <bib:author>Selesnick, I. W. and Burrus, C. S.</bib:author>
+        <bib:title>Automating the Design of Prime Length FFT Programs</bib:title>
+        <bib:booktitle>Proc. of 1992 ISCAS</bib:booktitle>
+        <bib:year>1992</bib:year>
+<!--optional fields-->
+        <bib:editor/>
+        <bib:number/>
+        <bib:series/>
+        <bib:pages/>
+        <bib:address/>
+        <bib:month/>
+        <bib:organization/>
+        <bib:publisher/>
+        <bib:note/>
+      </bib:inproceedings>
+    </bib:entry>
+    <bib:entry id="bid1">
+      <bib:inproceedings>
+<!--required fields-->
+        <bib:author>Selesnick, I. W. and Burrus, C. S.</bib:author>
+        <bib:title>Multidimensional Mapping Techniques for Convolution</bib:title>
+        <bib:booktitle>Proc. of 1993 ICASSP</bib:booktitle>
+        <bib:year>1993</bib:year>
+<!--optional fields-->
+        <bib:editor/>
+        <bib:number/>
+        <bib:series/>
+        <bib:pages/>
+        <bib:address/>
+        <bib:month/>
+        <bib:organization/>
+        <bib:publisher/>
+        <bib:note/>
+      </bib:inproceedings>
+    </bib:entry>
+    <bib:entry id="bid2">
+      <bib:inproceedings>
+<!--required fields-->
+        <bib:author>Selesnick, I. W. and Burrus, C. S.</bib:author>
+        <bib:title>Extending Winograd's Small Convolution Algorithm to Longer Lengths</bib:title>
+        <bib:booktitle>Proc. of 1994 ISCAS</bib:booktitle>
+        <bib:year>1994</bib:year>
+<!--optional fields-->
+        <bib:editor/>
+        <bib:number/>
+        <bib:series/>
+        <bib:pages/>
+        <bib:address/>
+        <bib:month/>
+        <bib:organization/>
+        <bib:publisher/>
+        <bib:note/>
+      </bib:inproceedings>
+    </bib:entry>
+    <bib:entry id="bid3">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Selesnick, I.W. and Burrus, C.S.</bib:author>
+        <bib:title>Automatic Generation of Prime Length FFT Programs</bib:title>
+        <bib:journal>IEEE Transactions on Signal Processing</bib:journal>
+        <bib:year>1996</bib:year>
+<!--optional fields-->
+        <bib:volume>44</bib:volume>
+        <bib:number>1</bib:number>
+        <bib:pages>14–24</bib:pages>
+        <bib:month>January</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid10">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Stasinski, R.</bib:author>
+        <bib:title>Easy Generation of Small-N Discrete Fourier Transform Algorithms</bib:title>
+        <bib:journal>IEE Proceedings, part G</bib:journal>
+        <bib:year>1986</bib:year>
+<!--optional fields-->
+        <bib:volume>133</bib:volume>
+        <bib:number>3</bib:number>
+        <bib:pages>133-139</bib:pages>
+        <bib:month>June</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid8">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Tolimieri, R. and An, M. and Lu, C.</bib:author>
+        <bib:title>Algorithms for Discrete Fourier Transform and Convolution</bib:title>
+        <bib:publisher>Springer-Verlag</bib:publisher>
+        <bib:year>1989</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+    <bib:entry id="bid7">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Winograd, S.</bib:author>
+        <bib:title>Arithmetic Complexity of Computations</bib:title>
+        <bib:publisher>SIAM</bib:publisher>
+        <bib:year>1980</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+  </bib:file>
+</document>

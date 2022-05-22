@@ -1,0 +1,103 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Conclusion</title>
+  <metadata>
+  <md:content-id>m18138</md:content-id><md:title>Conclusion</md:title>
+  <md:abstract/>
+  <md:uuid>9cf4015e-416f-4ee9-841d-f1d719e13a92</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Conclusion</title>
+      <para id="id2253721">We have found that by using the split nesting algorithm for circular
+convolution a new set of efficient prime length DFT modules that cover
+a wide variety of lengths can be developed.
+We have also exploited the structure in the split nesting algorithm
+to write a program that automatically generates compact readable code
+for convolution and prime length FFT programs.</para>
+      <para id="id2253731">The resulting code makes clear the organization and structure of the
+algorithm and clearly enumerates the disjoint convolutions into which
+the problem is decomposed.
+These independent convolutions can be executed in parallel and, moreover, the
+individual commands are of the form <m:math><m:mrow><m:mi>I</m:mi><m:mo>⊗</m:mo><m:mi>A</m:mi><m:mo>⊗</m:mo><m:mi>I</m:mi></m:mrow></m:math> which can be executed
+as parallel/vector commands on appropriate computer architectures<link target-id="bid0"/>.
+By recognizing also that the algorithms for different lengths share many of
+the same computational structures, the code we generate is made up of calls
+to a relatively small set of functions.
+Accordingly, the subroutines can be designed to specifically suit a given
+architecture.</para>
+      <para id="id2253770">The number of additions and multiplications incurred by the programs we have
+generated are the same as or are competitive with existing prime length FFT programs.
+We note that previously, prime length FFTs were made available for
+primes only up to 29.
+As in the original Winograd short convolution algorithms, the efficiency of the
+resulting prime <m:math><m:mi>p</m:mi></m:math> point DFT algorithm depends largely upon the factorability
+of <m:math><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math>.
+For example, if <m:math><m:mrow><m:mi>p</m:mi><m:mo>-</m:mo><m:mn>1</m:mn></m:mrow></m:math> is two times a prime, then an efficient <m:math><m:mi>p</m:mi></m:math> point
+DFT algorithm is more difficult to develop.</para>
+      <para id="id2253829">It should be noted too that the programs for convolution developed above are useful
+in the convolution of long integer sequences when exact results are needed.
+This is because all multiplicative constants in an <m:math><m:mi>n</m:mi></m:math> point integer convolution
+are integer multiples of <m:math><m:mrow><m:mn>1</m:mn><m:mo>/</m:mo><m:mi>n</m:mi></m:mrow></m:math> and this division by <m:math><m:mi>n</m:mi></m:math> can be delayed
+until the last stage or can simply be omitted if a scaled version
+of the convolution is acceptable.</para>
+      <para id="id2253871">By developing a large library of prime point FFT programs we can extend the
+maximum length and the variety of lengths of a prime factor algorithm or
+a Winograd Fourier transform algorithm.
+Furthermore, because the approach taken in this paper gives a bilinear form,
+it can be incorporated into the dynamic programming technique for designing
+optimal composite length FFT algorithms <link target-id="bid1"/>.
+The programs described in this paper can also be adapted to obtain
+discrete cosine transform (DCT) algorithms by simply permuting the input
+and output sequences <link target-id="bid2"/>.</para>
+    </section>
+  </content>
+  <bib:file>
+    <bib:entry id="bid2">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Heideman, M. T.</bib:author>
+        <bib:title>Computation of an Odd-Length DCT from a Real-Valued DFT of the Same Length</bib:title>
+        <bib:journal>IEEE Trans. Signal Proc.</bib:journal>
+        <bib:year>1992</bib:year>
+<!--optional fields-->
+        <bib:volume>40</bib:volume>
+        <bib:number>1</bib:number>
+        <bib:pages>54-59</bib:pages>
+        <bib:month>January</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid1">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Johnson, H. W. and Burrus, C. S.</bib:author>
+        <bib:title>The Design of Optimal DFT Algorithms Using Dynamic Programming</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1983</bib:year>
+<!--optional fields-->
+        <bib:volume>31</bib:volume>
+        <bib:number>2</bib:number>
+        <bib:pages>378-387</bib:pages>
+        <bib:month>April</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid0">
+      <bib:book>
+<!--required fields-->
+        <bib:author>Tolimieri, R. and An, M. and Lu, C.</bib:author>
+        <bib:title>Algorithms for Discrete Fourier Transform and Convolution</bib:title>
+        <bib:publisher>Springer-Verlag</bib:publisher>
+        <bib:year>1989</bib:year>
+<!--optional fields-->
+        <bib:volume/>
+        <bib:series/>
+        <bib:address/>
+        <bib:edition/>
+        <bib:month/>
+        <bib:note/>
+      </bib:book>
+    </bib:entry>
+  </bib:file>
+</document>

@@ -1,0 +1,339 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml" xmlns:bib="http://bibtexml.sf.net/">
+  <title>Programs for Prime Length FFTs</title>
+  <metadata>
+  <md:content-id>m18137</md:content-id><md:title>Programs for Prime Length FFTs</md:title>
+  <md:abstract/>
+  <md:uuid>c4a01b09-5f57-42fd-93a0-696858ef1144</md:uuid>
+</metadata>
+
+<content>
+    <section id="cid1">
+      <title>Programs for Prime Length FFTs</title>
+      <para id="id2253722">Using the circular convolution algorithms
+described above, we can easily design algorithms
+for prime length FFTs.
+The only modifications that needs to be made involve
+the permutation of Rader <link target-id="bid0"/> and
+the correct calculation of the DC term (<m:math><m:mrow><m:mi>y</m:mi><m:mo>(</m:mo><m:mn>0</m:mn><m:mo>)</m:mo></m:mrow></m:math>).
+These modifications are easily made to the above described
+approach.
+It simply requires a few extra commands in the
+programs.
+Note that the multiplicative constants are
+computed directly, since we have programs
+for all the relevant operations.</para>
+      <para id="id2253757">In the version we have currently implemented
+and verified for correctness,
+we precompute the multiplicative constants, the input permutation and the
+output permutation.
+From <link document="m18134" target-id="uid7">Equation 8 from A Bilinear Form for the DFT</link>, the multiplicative constants are given
+by <m:math><m:mrow><m:msub><m:mi>V</m:mi><m:mi>p</m:mi></m:msub><m:mrow><m:mo>(</m:mo><m:mn>1</m:mn><m:mo>⊕</m:mo><m:msup><m:mi>C</m:mi><m:mi>t</m:mi></m:msup><m:msup><m:mi>R</m:mi><m:mrow><m:mo>-</m:mo><m:mi>t</m:mi></m:mrow></m:msup><m:mi>P</m:mi><m:mi>J</m:mi><m:msub><m:mi>Q</m:mi><m:mi>s</m:mi></m:msub><m:mo>)</m:mo></m:mrow><m:mi>w</m:mi></m:mrow></m:math>,
+the input permutation is given by
+<m:math><m:mrow><m:mn>1</m:mn><m:mo>⊕</m:mo><m:mi>P</m:mi><m:msub><m:mi>Q</m:mi><m:mi>r</m:mi></m:msub></m:mrow></m:math>, and the output permutation is given by
+<m:math><m:mrow><m:mn>1</m:mn><m:mo>⊕</m:mo><m:msubsup><m:mi>Q</m:mi><m:mi>s</m:mi><m:mi>t</m:mi></m:msubsup><m:mi>J</m:mi><m:msup><m:mi>P</m:mi><m:mi>t</m:mi></m:msup></m:mrow></m:math>.
+The multiplicative constants, the input and output permutation are
+each stored as vectors.
+These vectors are then passed to the prime length FFT program,
+which consists of the appropriate function calls,
+see the appendix.
+In previous prime length FFT modules, the input and output
+permutations can be completely absorbed in to the computational
+instructions. This is possible because they are written as straight
+line code.
+It is simple to modify the code generating program we have implemented so that
+it produces straight line code and absorbs the permutations
+in to the computational program instructions.</para>
+      <para id="id2254132">In an in-place in-order prime factor algorithm for the DFT <link target-id="bid1"/>, <link target-id="bid2"/>,
+the necessary permuted forms of the DFT can be obtained
+by modifying the multiplicative constants.
+This can be easily done by permuting the roots of unity, <m:math><m:mi>w</m:mi></m:math>,
+in the expression for the multiplicative constants <link target-id="bid1"/>, <link target-id="bid3"/>,
+nothing else in the structure of the algorithm needs to be changed.
+By changing the multiplicative constants, it is not possible,
+however, to omit the permutation required for Rader's conversion
+of the prime length DFT in to circular convolution.</para>
+      <section id="uid1">
+        <title>Operation Counts</title>
+        <para id="id2254180"><link target-id="uid2"/> lists the arithmetic operations
+incurred by the FFT programs we have generated and
+verified for correctness.
+Note that the number of additions and multiplications
+incurred by the programs we have generated
+are the same as previously existing programs for prime lengths
+up to and including 13.
+For <m:math><m:mrow><m:mi>p</m:mi><m:mo>=</m:mo><m:mn>17</m:mn></m:mrow></m:math> a program with 70 multiplications and 314 additions
+has been written,
+and for <m:math><m:mrow><m:mi>p</m:mi><m:mo>=</m:mo><m:mn>19</m:mn></m:mrow></m:math> a program with 76 multiplications and 372 additions
+has been written <link target-id="bid4"/>.
+Thus for the length <m:math><m:mrow><m:mi>p</m:mi><m:mo>=</m:mo><m:mn>17</m:mn></m:mrow></m:math>, the program we have generated
+requires fewer total arithmetic operations,
+while for <m:math><m:mrow><m:mi>p</m:mi><m:mo>=</m:mo><m:mn>19</m:mn></m:mrow></m:math>, ours uses more.</para>
+        <para id="id2254258">There are several table of operation counts in <link target-id="bid5"/>, each
+table corresponding to a different variation of the algorithms
+used in that paper.
+For each variation, the algorithms we have described use fewer
+additions and fewer multiplications.
+The focus of <link target-id="bid5"/>, however, is the implementation
+of prime point FFT on various computer architectures
+and the advantage that can be gained from matching algorithms with architectures.
+It should be noted that the highest prime in <link target-id="bid5"/> for which
+an FFT was designed is 29.
+Although we have not executed the programs described in this paper
+on these computers, they are, as mentioned above, written
+to be easily adapted to parallel/vector computers.</para>
+        <table id="uid2" summary="">
+<tgroup cols="11"><tbody>
+              <row>
+                <entry>P</entry>
+                <entry>muls</entry>
+                <entry>adds</entry>
+<entry/>                
+<entry>P</entry>
+                <entry>muls</entry>
+                <entry>adds</entry>
+<entry/>            
+    <entry>P</entry>
+                <entry>muls</entry>
+                <entry>adds</entry>
+              </row>
+              <row>
+                <entry>3</entry>
+                <entry>4</entry>
+                <entry>12</entry>
+<entry/>        
+        <entry>41</entry>
+                <entry>280</entry>
+                <entry>1140</entry>
+<entry/>        
+        <entry>241</entry>
+                <entry>3280</entry>
+                <entry>13020</entry>
+              </row>
+              <row>
+                <entry>5</entry>
+                <entry>10</entry>
+                <entry>34</entry>
+<entry/>        
+        <entry>43</entry>
+                <entry>256</entry>
+                <entry>1440</entry>
+<entry/>        
+        <entry>271</entry>
+                <entry>3760</entry>
+                <entry>18152</entry>
+              </row>
+              <row>
+                <entry>7</entry>
+                <entry>16</entry>
+                <entry>72</entry>
+<entry/>        
+        <entry>61</entry>
+                <entry>400</entry>
+                <entry>1908</entry>
+<entry/>        
+        <entry>281</entry>
+                <entry>4480</entry>
+                <entry>19036</entry>
+              </row>
+              <row>
+                <entry>11</entry>
+                <entry>40</entry>
+                <entry>168</entry>
+<entry/>        
+        <entry>71</entry>
+                <entry>640</entry>
+                <entry>3112</entry>
+<entry/>        
+        <entry>337</entry>
+                <entry>5248</entry>
+                <entry>22268</entry>
+              </row>
+              <row>
+                <entry>13</entry>
+                <entry>40</entry>
+                <entry>188</entry>
+<entry/>        
+        <entry>73</entry>
+                <entry>532</entry>
+                <entry>2504</entry>
+<entry/>        
+        <entry>379</entry>
+                <entry>6016</entry>
+                <entry>32880</entry>
+              </row>
+              <row>
+                <entry>17</entry>
+                <entry>82</entry>
+                <entry>274</entry>
+<entry/>        
+        <entry>109</entry>
+                <entry>940</entry>
+                <entry>5096</entry>
+<entry/>        
+        <entry>421</entry>
+                <entry>6400</entry>
+                <entry>29412</entry>
+              </row>
+              <row>
+                <entry>19</entry>
+                <entry>76</entry>
+                <entry>404</entry>
+<entry/>        
+        <entry>113</entry>
+                <entry>1312</entry>
+                <entry>5516</entry>
+<entry/>        
+        <entry>433</entry>
+                <entry>7708</entry>
+                <entry>32864</entry>
+              </row>
+              <row>
+                <entry>29</entry>
+                <entry>160</entry>
+                <entry>836</entry>
+<entry/>        
+        <entry>127</entry>
+                <entry>1216</entry>
+                <entry>6760</entry>
+<entry/>        
+        <entry>541</entry>
+                <entry>9400</entry>
+                <entry>43020</entry>
+              </row>
+              <row>
+                <entry>31</entry>
+                <entry>160</entry>
+                <entry>776</entry>
+<entry/>        
+        <entry>181</entry>
+                <entry>1900</entry>
+                <entry>8936</entry>
+<entry/>        
+        <entry>631</entry>
+                <entry>12160</entry>
+                <entry>56056</entry>
+              </row>
+              <row>
+                <entry>37</entry>
+                <entry>190</entry>
+                <entry>990</entry>
+<entry/>        
+        <entry>211</entry>
+                <entry>2560</entry>
+                <entry>12368</entry>
+<entry/>        
+        <entry>757</entry>
+                <entry>15040</entry>
+                <entry>76292</entry>
+              </row>
+            </tbody>
+          
+</tgroup>
+<caption>Operation counts for prime length FFTs</caption>
+</table>
+        <figure id="uid3" orient="horizontal">
+          <media id="id1170621847257" alt=""><image src="../../media/Pfft_plot.png" mime-type="image/png" width="496"/><image for="pdf" src="../../media/Pfft_plot.eps" mime-type="application/postscript"/></media>
+          <caption>Plot of additions and multiplications incurred by prime
+length FFTs.</caption>
+        </figure>
+        <figure id="uid4" orient="horizontal">
+          <media id="id1170627899303" alt=""><image src="../../media/Pfft_loglog.png" mime-type="image/png" width="580"/><image for="pdf" src="../../media/Pfft_loglog.eps" mime-type="application/postscript"/></media>
+          <caption>Plot of additions and multiplications incurred by prime
+length FFTs.</caption>
+        </figure>
+      </section>
+    </section>
+  </content>
+  <bib:file>
+    <bib:entry id="bid1">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Burrus, C. S. and Eschenbacher, P. W.</bib:author>
+        <bib:title>An In-place, In-order prime factor FFT algorithm</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1981</bib:year>
+<!--optional fields-->
+        <bib:volume>29</bib:volume>
+        <bib:number>4</bib:number>
+        <bib:pages>806-817</bib:pages>
+        <bib:month>August</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid4">
+      <bib:techreport>
+<!--required fields-->
+        <bib:author>Johnson, H. W. and Burrus, S.</bib:author>
+        <bib:title>Large DFT Modules: 11, 13, 17, 19, 25</bib:title>
+        <bib:institution>Rice University</bib:institution>
+        <bib:year>1981</bib:year>
+<!--optional fields-->
+        <bib:type>Technical report</bib:type>
+        <bib:number>8105</bib:number>
+        <bib:address/>
+        <bib:month/>
+        <bib:note/>
+      </bib:techreport>
+    </bib:entry>
+    <bib:entry id="bid3">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Johnson, H. W. and Burrus, C. S.</bib:author>
+        <bib:title>On the Structure of Efficient DFT Algorithms</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1985</bib:year>
+<!--optional fields-->
+        <bib:volume>33</bib:volume>
+        <bib:number>1</bib:number>
+        <bib:pages>248-254</bib:pages>
+        <bib:month>February</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid5">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Lu, C. and Cooley, J. W. and Tolimieri, R.</bib:author>
+        <bib:title>FFT Algorithms for Prime Transform Sizes and their Implementations of VAX, IBM3090VF, and IBM RS/6000</bib:title>
+        <bib:journal>IEEE Trans. Acoust., Speech, Signal Proc.</bib:journal>
+        <bib:year>1993</bib:year>
+<!--optional fields-->
+        <bib:volume>41</bib:volume>
+        <bib:number>2</bib:number>
+        <bib:pages>638-648</bib:pages>
+        <bib:month>February</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid0">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Rader, C. M.</bib:author>
+        <bib:title>Discrete Fourier Transform When the Number of Data Samples is Prime</bib:title>
+        <bib:journal>Proc. IEEE</bib:journal>
+        <bib:year>1968</bib:year>
+<!--optional fields-->
+        <bib:volume>56</bib:volume>
+        <bib:number>6</bib:number>
+        <bib:pages>1107-1108</bib:pages>
+        <bib:month>June</bib:month>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+    <bib:entry id="bid2">
+      <bib:article>
+<!--required fields-->
+        <bib:author>Temperton, C.</bib:author>
+        <bib:title>Implementation of a Self-Sorting In-Place Prime Factor FFT Algorithm</bib:title>
+        <bib:journal>Journal of Computational Physics</bib:journal>
+        <bib:year>1985</bib:year>
+<!--optional fields-->
+        <bib:volume>58</bib:volume>
+        <bib:number/>
+        <bib:pages>283-299</bib:pages>
+        <bib:month/>
+        <bib:note/>
+      </bib:article>
+    </bib:entry>
+  </bib:file>
+</document>
