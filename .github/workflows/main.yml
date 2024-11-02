@@ -41,7 +41,7 @@ jobs:
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: /tmp/_attic/IO_ARTIFACTS/automatic-generation-of-prime-length-fft-programs.epub
+          artifacts: /tmp/_attic/IO_ARTIFACTS/automatic-generation-of-prime-length-fft-programs.html
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: ${{ steps.tag_version.outputs.new_tag }}
           omitBody: True
